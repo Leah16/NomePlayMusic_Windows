@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio and other IDEs
+.vs/
+.idea/
+*.user
+*.suo
+*.rsuser
+*.DotSettings.user
+
+# MSIX packaging output
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+*.msixupload
+
+# Signing certificates never go into the repository
+*.pfx

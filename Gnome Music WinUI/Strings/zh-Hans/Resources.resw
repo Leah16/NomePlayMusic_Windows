@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later
+     Simplified Chinese strings taken from GNOME Music's po/zh_CN.po
+     (translators: tuhaihe, Tong Hui, sphinx, Mingcong Bai, Dingzhong Chen, Cheng Lu,
+     lumingzh, Boyuan Yang). Strings specific to the Windows port are marked "port". -->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Application -->
+  <data name="AppName" xml:space="preserve"><value>Nome Play Music</value></data>  <!-- port -->
+  <data name="AppDescription" xml:space="preserve"><value>播放与管理您的音乐集</value></data>
+  <data name="AppLongDescription" xml:space="preserve"><value>简单而愉快的播放音乐的方式。</value></data>
+
+  <!-- Views -->
+  <data name="Albums" xml:space="preserve"><value>专辑</value></data>
+  <data name="Artists" xml:space="preserve"><value>艺术家</value></data>
+  <data name="Playlists" xml:space="preserve"><value>播放列表</value></data>
+  <data name="Songs" xml:space="preserve"><value>歌曲</value></data>
+
+  <!-- Header bar -->
+  <data name="Menu" xml:space="preserve"><value>菜单</value></data>
+  <data name="Search" xml:space="preserve"><value>搜索</value></data>
+  <data name="Back" xml:space="preserve"><value>后退</value></data>
+  <data name="Preferences" xml:space="preserve"><value>首选项</value></data>
+  <data name="KeyboardShortcuts" xml:space="preserve"><value>键盘快捷键</value></data>
+  <data name="Help" xml:space="preserve"><value>帮助</value></data>
+  <data name="About" xml:space="preserve"><value>关于</value></data>  <!-- port -->
+  <data name="SearchPlaceholder" xml:space="preserve"><value>搜索歌曲、艺术家、和专辑</value></data>
+
+  <!-- Player toolbar -->
+  <data name="Play" xml:space="preserve"><value>播放</value></data>
+  <data name="Pause" xml:space="preserve"><value>暂停</value></data>
+  <data name="Previous" xml:space="preserve"><value>上一首</value></data>
+  <data name="Next" xml:space="preserve"><value>下一首</value></data>
+  <data name="SetRepeatMode" xml:space="preserve"><value>设置重复模式</value></data>
+  <data name="AdjustVolume" xml:space="preserve"><value>调整音量</value></data>
+  <data name="MuteUnmute" xml:space="preserve"><value>静音/取消静音</value></data>
+  <data name="PlayQueue" xml:space="preserve"><value>播放队列</value></data>
+  <data name="MiniPlayer" xml:space="preserve"><value>迷你播放器</value></data>
+  <data name="AudioOutput" xml:space="preserve"><value>音频输出</value></data>
+  <data name="BackToFullView" xml:space="preserve"><value>返回完整视图</value></data>
+  <data name="Lyrics" xml:space="preserve"><value>歌词</value></data>
+  <data name="ShowLyrics" xml:space="preserve"><value>显示歌词</value></data>
+  <data name="HideLyrics" xml:space="preserve"><value>隐藏歌词</value></data>
+  <data name="LyricsLoading" xml:space="preserve"><value>正在获取歌词…</value></data>
+  <data name="LyricsNotFound" xml:space="preserve"><value>没获取到</value></data>
+  <data name="LyricsNotSynced" xml:space="preserve"><value>歌词未同步</value></data>
+  <data name="LyricsInstrumental" xml:space="preserve"><value>纯音乐</value></data>
+  <data name="RepeatNone" xml:space="preserve"><value>关闭随机/重复播放</value></data>
+  <data name="RepeatSong" xml:space="preserve"><value>重复播放</value></data>
+  <data name="RepeatAll" xml:space="preserve"><value>全部重播</value></data>
+  <data name="RepeatShuffle" xml:space="preserve"><value>随机播放</value></data>
+
+  <!-- Albums, artists, songs -->
+  <data name="UnknownArtist" xml:space="preserve"><value>未知艺术家</value></data>
+  <data name="UnknownAlbum" xml:space="preserve"><value>未知专辑</value></data>
+  <!-- port -->
+  <data name="VariousArtists" xml:space="preserve"><value>多位艺术家</value></data>
+  <data name="MenuPlay" xml:space="preserve"><value>播放</value></data>
+  <data name="AddToFavoriteSongs" xml:space="preserve"><value>添加至收藏歌曲</value></data>
+  <data name="AddToPlaylistEllipsis" xml:space="preserve"><value>添加到播放列表…</value></data>
+  <data name="RemoveFromPlaylist" xml:space="preserve"><value>从播放列表移除</value></data>
+  <data name="OpenLocation" xml:space="preserve"><value>打开位置</value></data>
+  <data name="Star" xml:space="preserve"><value>星标</value></data>
+  <data name="Unstar" xml:space="preserve"><value>取消星标</value></data>
+  <data name="ViewAll" xml:space="preserve"><value>查看所有</value></data>
+  <data name="DiscFormat" xml:space="preserve"><value>唱片 {0}</value></data>
+  <data name="Minutes_One" xml:space="preserve"><value>{0} 分钟</value></data>
+  <data name="Minutes_Other" xml:space="preserve"><value>{0} 分钟</value></data>
+  <data name="SongCount_One" xml:space="preserve"><value>{0} 首歌曲</value></data>
+  <data name="SongCount_Other" xml:space="preserve"><value>{0} 首歌曲</value></data>
+
+  <!-- Playlists -->
+  <data name="MenuDelete" xml:space="preserve"><value>移除</value></data>
+  <data name="MenuRename" xml:space="preserve"><value>重命名…</value></data>
+  <data name="PlaylistName" xml:space="preserve"><value>播放列表名</value></data>
+  <data name="Done" xml:space="preserve"><value>完成</value></data>
+  <data name="AddToPlaylist" xml:space="preserve"><value>添加到播放列表</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Add" xml:space="preserve"><value>添加</value></data>
+  <data name="Create" xml:space="preserve"><value>创建</value></data>
+  <data name="FirstPlaylistPrompt" xml:space="preserve"><value>输入您首个播放列表的名称</value></data>
+  <data name="NewPlaylistEllipsis" xml:space="preserve"><value>新建播放列表…</value></data>
+  <data name="PlaylistRemoved" xml:space="preserve"><value>播放列表 {0} 已移除</value></data>
+  <data name="SongRemovedFrom" xml:space="preserve"><value>{0} 已从 {1} 移除</value></data>
+  <data name="Undo" xml:space="preserve"><value>撤消</value></data>
+  <data name="MostPlayed" xml:space="preserve"><value>最多播放</value></data>
+  <data name="NeverPlayed" xml:space="preserve"><value>从未播放</value></data>
+  <data name="RecentlyPlayed" xml:space="preserve"><value>最近播放</value></data>
+  <data name="RecentlyAdded" xml:space="preserve"><value>最近添加</value></data>
+  <data name="StarredSongs" xml:space="preserve"><value>收藏歌曲</value></data>
+  <data name="InsufficientlyTagged" xml:space="preserve"><value>标记不足</value></data>
+  <data name="AllSongs" xml:space="preserve"><value>全部歌曲</value></data>
+
+  <!-- Status pages -->
+  <data name="WelcomeToMusic" xml:space="preserve"><value>欢迎使用 Nome Play Music</value></data>  <!-- port -->
+  <data name="MusicFolder" xml:space="preserve"><value>音乐文件夹</value></data>
+  <data name="ContentsWillAppear" xml:space="preserve"><value>{0} 的内容将会显示在此处。</value></data>
+  <data name="NoMusicFound" xml:space="preserve"><value>未找到音乐</value></data>
+  <data name="TryADifferentSearch" xml:space="preserve"><value>尝试不同的搜索</value></data>
+  <data name="NoSearchStarted" xml:space="preserve"><value>未开始搜索</value></data>
+  <data name="NoSearchStartedDescription" xml:space="preserve"><value>使用搜索栏来搜索专辑、艺术家或歌曲</value></data>
+  <data name="NoResultsFound" xml:space="preserve"><value>未找到结果</value></data>
+  <data name="TryDifferentSearch" xml:space="preserve"><value>尝试不同的搜索</value></data>
+  <!-- port -->
+  <data name="ScanningLibrary" xml:space="preserve"><value>正在扫描您的音乐…</value></data>
+  <data name="MusicFolderNotSet" xml:space="preserve"><value>您的音乐文件夹没有设置。</value></data>
+
+  <!-- Errors -->
+  <data name="UnableToPlay" xml:space="preserve"><value>无法播放该文件</value></data>
+  <data name="PlayingMusic" xml:space="preserve"><value>正在播放音乐</value></data>
+
+  <!-- Preferences -->
+  <data name="PlayerSettings" xml:space="preserve"><value>播放器设置</value></data>
+  <data name="RepeatModeTitle" xml:space="preserve"><value>重复模式</value></data>
+  <data name="RepeatModeNone" xml:space="preserve"><value>无</value></data>
+  <data name="RepeatModeSong" xml:space="preserve"><value>歌曲</value></data>
+  <data name="RepeatModeAll" xml:space="preserve"><value>全部</value></data>
+  <data name="ReplayGain" xml:space="preserve"><value>回放增益</value></data>
+  <data name="ReplayGainDescription" xml:space="preserve"><value>如果找到了回放增益元数据，则平衡歌曲之间的响度</value></data>
+  <data name="ReplayGainDisabled" xml:space="preserve"><value>已禁用</value></data>
+  <data name="ReplayGainAlbum" xml:space="preserve"><value>专辑</value></data>
+  <data name="ReplayGainTrack" xml:space="preserve"><value>曲目</value></data>
+  <data name="PowerSettings" xml:space="preserve"><value>电源设置</value></data>
+  <data name="InhibitSuspend" xml:space="preserve"><value>禁止挂起</value></data>
+  <data name="OnlyWhilePlaying" xml:space="preserve"><value>只在播放的时候</value></data>
+  <!-- port -->
+  <data name="MusicFolders" xml:space="preserve"><value>音乐文件夹</value></data>
+  <data name="MusicFoldersDescription" xml:space="preserve"><value>在这些文件夹中查找音乐</value></data>
+  <data name="AddFolder" xml:space="preserve"><value>添加文件夹…</value></data>
+  <data name="RemoveFolder" xml:space="preserve"><value>移除</value></data>
+  <data name="Close" xml:space="preserve"><value>关闭</value></data>
+
+  <!-- Shortcuts dialog -->
+  <data name="ShortcutsGeneral" xml:space="preserve"><value>常规</value></data>
+  <data name="ShortcutsPreferences" xml:space="preserve"><value>首选项</value></data>
+  <data name="ShortcutsSearch" xml:space="preserve"><value>搜索</value></data>
+  <data name="ShortcutsHelp" xml:space="preserve"><value>帮助</value></data>
+  <data name="ShortcutsKeyboardShortcuts" xml:space="preserve"><value>键盘快捷键</value></data>
+  <data name="ShortcutsQuit" xml:space="preserve"><value>退出</value></data>
+  <data name="ShortcutsPlayback" xml:space="preserve"><value>播放</value></data>
+  <data name="ShortcutsPlayPause" xml:space="preserve"><value>播放/暂停</value></data>
+  <data name="ShortcutsNextSong" xml:space="preserve"><value>下一首歌曲</value></data>
+  <data name="ShortcutsPreviousSong" xml:space="preserve"><value>上一首歌曲</value></data>
+  <data name="ShortcutsToggleRepeat" xml:space="preserve"><value>重复播放</value></data>
+  <data name="ShortcutsToggleShuffle" xml:space="preserve"><value>随机播放</value></data>
+  <data name="ShortcutsIncreaseVolume" xml:space="preserve"><value>增大音量</value></data>
+  <data name="ShortcutsDecreaseVolume" xml:space="preserve"><value>减小音量</value></data>
+  <data name="ShortcutsToggleMute" xml:space="preserve"><value>切换静音</value></data>
+  <data name="ShortcutsNavigation" xml:space="preserve"><value>导航</value></data>
+  <data name="ShortcutsGoToAlbums" xml:space="preserve"><value>转到专辑</value></data>
+  <data name="ShortcutsGoToArtists" xml:space="preserve"><value>转到艺术家</value></data>
+  <data name="ShortcutsGoToPlaylists" xml:space="preserve"><value>转到播放列表</value></data>
+  <data name="ShortcutsGoBack" xml:space="preserve"><value>返回</value></data>
+
+  <!-- About -->
+  <data name="Copyright" xml:space="preserve"><value>© GNOME 音乐开发者</value></data>
+  <data name="TranslatorCredits" xml:space="preserve"><value>tuhaihe &lt;1132321739qq@gmail.com&gt;, 2013
+Tong Hui &lt;tonghuix@gmail.com&gt;, 2013
+sphinx &lt;yishanj@gmail.com&gt;, 2014
+Mingcong Bai &lt;jeffbai@aosc.xyz&gt;, 2018
+Dingzhong Chen &lt;wsxy162@gmail.com&gt;, 2018, 2019
+Cheng Lu &lt;chenglu1990@gmail.com&gt;, 2016, 2020
+lumingzh &lt;lumingzh@qq.com&gt;, 2022-2026
+Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
+  <!-- port -->
+  <data name="GnomePortProject" xml:space="preserve"><value>GNOME 移植项目</value></data>
+  <data name="PortDescription" xml:space="preserve"><value>GNOME 音乐的 Windows 移植版，基于 WinUI 3 构建。</value></data>
+  <data name="LicenseNotice" xml:space="preserve"><value>本应用不提供任何担保。详情请参阅 {0}。</value></data>
+  <data name="LicenseName" xml:space="preserve"><value>GNU 通用公共许可证第 2 版或更高版本</value></data>
+  <data name="Website" xml:space="preserve"><value>网站</value></data>
+  <data name="AboutDevelopers" xml:space="preserve"><value>开发者</value></data>
+  <data name="AboutDesigners" xml:space="preserve"><value>设计者</value></data>
+  <data name="AboutTranslators" xml:space="preserve"><value>翻译者</value></data>
+  <data name="AboutLegal" xml:space="preserve"><value>法律信息</value></data>
+  <data name="AboutReportIssue" xml:space="preserve"><value>报告问题</value></data>
+  <data name="AboutSourceCode" xml:space="preserve"><value>源代码</value></data>
+
+  <!-- port: preferences categories -->
+  <data name="PrefsPlayback" xml:space="preserve"><value>播放</value></data>
+  <data name="PrefsOutput" xml:space="preserve"><value>音乐输出</value></data>
+  <data name="PrefsControls" xml:space="preserve"><value>播放器控制</value></data>
+
+  <!-- port: playback processing -->
+  <data name="ChannelProcessing" xml:space="preserve"><value>声道处理</value></data>
+  <data name="PhaseInvert" xml:space="preserve"><value>相位反转</value></data>
+  <data name="PhaseInvertDescription" xml:space="preserve"><value>反转所有声道的波形极性</value></data>
+  <data name="MonoOutput" xml:space="preserve"><value>单声道输出</value></data>
+  <data name="MonoOutputDescription" xml:space="preserve"><value>左右声道混合后从两侧同时输出</value></data>
+  <data name="SwapChannels" xml:space="preserve"><value>左右声道互换</value></data>
+  <data name="SwapChannelsDescription" xml:space="preserve"><value>左声道从右侧输出，右声道从左侧输出</value></data>
+
+  <!-- port: music output -->
+  <data name="OutputDevice" xml:space="preserve"><value>输出设备</value></data>
+  <data name="AudioInterface" xml:space="preserve"><value>音频接口</value></data>
+  <data name="AudioInterfaceDescription" xml:space="preserve"><value>DirectSound 和 WASAPI 共享模式经过 Windows 混音器；ASIO 使用声卡自己的驱动</value></data>
+  <data name="ExclusiveMode" xml:space="preserve"><value>独占模式</value></data>
+  <data name="ExclusiveModeDescription" xml:space="preserve"><value>独占设备，按文件原本的格式输出（比特完美）</value></data>
+  <data name="Device" xml:space="preserve"><value>设备</value></data>
+  <data name="DefaultDevice" xml:space="preserve"><value>默认设备</value></data>
+  <data name="NoAsioDriver" xml:space="preserve"><value>未安装 ASIO 驱动</value></data>
+  <data name="DeviceFormats" xml:space="preserve"><value>设备支持的格式</value></data>
+  <data name="PcmRates" xml:space="preserve"><value>PCM 采样率</value></data>
+  <data name="BitDepths" xml:space="preserve"><value>位深</value></data>
+  <data name="DsdRates" xml:space="preserve"><value>DSD</value></data>
+  <data name="ChannelCounts" xml:space="preserve"><value>声道</value></data>
+  <data name="Checking" xml:space="preserve"><value>正在检测…</value></data>
+  <data name="NotSupported" xml:space="preserve"><value>不支持</value></data>
+  <data name="MixerFormat" xml:space="preserve"><value>经过 Windows 混音器时设备以 {0}、{1}运行；独占模式可以按上面的格式原样输出。</value></data>
+  <data name="ExclusiveUnsupported" xml:space="preserve"><value>此设备不支持独占模式（可能是远程或虚拟设备），以上是 Windows 混音器使用的格式。</value></data>
+  <data name="DopSuffix" xml:space="preserve"><value>DoP</value></data>
+  <data name="NativeSuffix" xml:space="preserve"><value>原生</value></data>
+  <data name="MonoChannel" xml:space="preserve"><value>单声道</value></data>
+  <data name="StereoChannels" xml:space="preserve"><value>立体声</value></data>
+  <data name="IntBits" xml:space="preserve"><value>{0} 位</value></data>
+  <data name="FloatBits" xml:space="preserve"><value>{0} 位浮点</value></data>
+  <data name="DsdTransport" xml:space="preserve"><value>DSD 传输方式</value></data>
+  <data name="DsdConvert" xml:space="preserve"><value>转换为 PCM</value></data>
+  <data name="DsdDop" xml:space="preserve"><value>DoP（DSD over PCM）</value></data>
+  <data name="DsdNative" xml:space="preserve"><value>原生 DSD</value></data>
+  <data name="DsdConvertDescription" xml:space="preserve"><value>适用于所有设备：DSD 转换为 88.2 kHz PCM 播放。</value></data>
+  <data name="DsdDopDescription" xml:space="preserve"><value>仅用于支持 DoP 的 DAC，否则会发出很响的噪声。需要 WASAPI 独占模式或 ASIO。</value></data>
+  <data name="DsdNativeDescription" xml:space="preserve"><value>需要支持 DSD 的 ASIO 驱动。</value></data>
+  <data name="DsdBitstreamNote" xml:space="preserve"><value>DoP 和原生 DSD 不经过音量、回放增益和单声道处理。</value></data>
+  <data name="DsdNotPossible" xml:space="preserve"><value>当前输出无法使用这种方式，DSD 会转换为 PCM 播放。</value></data>
+  <data name="DsdGain" xml:space="preserve"><value>转换增益</value></data>
+  <data name="DsdGainDescription" xml:space="preserve"><value>DSD 参考电平转换后为 −6 dBFS，可提升到与 PCM 相当</value></data>
+
+  <!-- port: player controls -->
+  <data name="Features" xml:space="preserve"><value>功能</value></data>
+  <data name="FeatureMiniPlayer" xml:space="preserve"><value>小窗</value></data>
+  <data name="FeatureMiniPlayerDescription" xml:space="preserve"><value>播放栏里的小窗按钮</value></data>
+  <data name="FeatureOutputButton" xml:space="preserve"><value>设备快速切换</value></data>
+  <data name="FeatureOutputButtonDescription" xml:space="preserve"><value>播放栏里的音频输出按钮，用来切换音频接口、设备和独占模式</value></data>
+  <data name="FeatureVolume" xml:space="preserve"><value>音量控制</value></data>
+  <data name="FeatureVolumeDescription" xml:space="preserve"><value>关闭后以最大音量播放，不显示音量按钮</value></data>
+  <data name="FeatureLyrics" xml:space="preserve"><value>歌词</value></data>
+  <data name="FeatureLyricsDescription" xml:space="preserve"><value>点击播放栏里的歌曲查看歌词</value></data>
+  <data name="LoadLocalLyrics" xml:space="preserve"><value>加载本地歌词</value></data>
+  <data name="LoadLocalLyricsDescription" xml:space="preserve"><value>先读取歌曲文件夹里与歌曲同名的 .lrc 文件，没有时再到云端搜索</value></data>
+  <data name="DownloadLyrics" xml:space="preserve"><value>从云端下载歌词</value></data>
+  <data name="DownloadLyricsDescription" xml:space="preserve"><value>把云端找到的歌词保存为歌曲文件夹里与歌曲同名的 .lrc 文件</value></data>
+  <data name="Display" xml:space="preserve"><value>显示</value></data>
+  <data name="ShowAudioFormat" xml:space="preserve"><value>显示位深与采样率</value></data>
+  <data name="ShowAudioFormatDescription" xml:space="preserve"><value>在播放栏的歌名和歌手下方显示一行</value></data>
+  <data name="OutputFallback" xml:space="preserve"><value>无法使用所选的输出设备，已改用默认设备播放</value></data>
+  <data name="NoPlaybackDevice" xml:space="preserve"><value>没有可用的播放设备，已暂停</value></data>
+
+  <!-- port: song properties -->
+  <data name="Properties" xml:space="preserve"><value>属性</value></data>
+  <data name="Tags" xml:space="preserve"><value>标签</value></data>
+  <data name="PropFile" xml:space="preserve"><value>文件</value></data>
+  <data name="PropAudio" xml:space="preserve"><value>音频</value></data>
+  <data name="PropStatistics" xml:space="preserve"><value>播放统计</value></data>
+  <data name="PropType" xml:space="preserve"><value>类型</value></data>
+  <data name="PropSize" xml:space="preserve"><value>大小</value></data>
+  <data name="PropBytes" xml:space="preserve"><value>{0} 字节</value></data>
+  <data name="PropModified" xml:space="preserve"><value>修改日期</value></data>
+  <data name="PropLocation" xml:space="preserve"><value>位置</value></data>
+  <data name="PropDuration" xml:space="preserve"><value>时长</value></data>
+  <data name="PropFormat" xml:space="preserve"><value>格式</value></data>
+  <data name="PropSampleRate" xml:space="preserve"><value>采样率</value></data>
+  <data name="PropBitDepth" xml:space="preserve"><value>位深</value></data>
+  <data name="PropBitrate" xml:space="preserve"><value>比特率</value></data>
+  <data name="PropEncoder" xml:space="preserve"><value>编码器</value></data>
+  <data name="PropTagFormat" xml:space="preserve"><value>标签格式</value></data>
+  <data name="PropAdded" xml:space="preserve"><value>添加日期</value></data>
+  <data name="PropLastPlayed" xml:space="preserve"><value>最后播放</value></data>
+  <data name="PropPlayCount" xml:space="preserve"><value>播放次数</value></data>
+  <data name="PropFavorite" xml:space="preserve"><value>收藏</value></data>
+  <data name="PropNever" xml:space="preserve"><value>从未播放</value></data>
+  <data name="PropYes" xml:space="preserve"><value>是</value></data>
+  <data name="PropNo" xml:space="preserve"><value>否</value></data>
+  <data name="PropTrackGain" xml:space="preserve"><value>曲目增益</value></data>
+  <data name="PropTrackPeak" xml:space="preserve"><value>曲目峰值</value></data>
+  <data name="PropAlbumGain" xml:space="preserve"><value>专辑增益</value></data>
+  <data name="PropAlbumPeak" xml:space="preserve"><value>专辑峰值</value></data>
+  <data name="PropNotCalculated" xml:space="preserve"><value>未计算</value></data>
+  <data name="PropTitle" xml:space="preserve"><value>标题</value></data>
+  <data name="PropArtist" xml:space="preserve"><value>艺术家</value></data>
+  <data name="PropAlbumArtist" xml:space="preserve"><value>专辑艺术家</value></data>
+  <data name="PropAlbum" xml:space="preserve"><value>专辑</value></data>
+  <data name="PropYear" xml:space="preserve"><value>年份</value></data>
+  <data name="PropTrack" xml:space="preserve"><value>音轨</value></data>
+  <data name="PropDisc" xml:space="preserve"><value>碟片</value></data>
+  <data name="PropGenre" xml:space="preserve"><value>流派</value></data>
+  <data name="PropComposer" xml:space="preserve"><value>作曲</value></data>
+  <data name="PropConductor" xml:space="preserve"><value>指挥</value></data>
+  <data name="PropPublisher" xml:space="preserve"><value>发行商</value></data>
+  <data name="PropGrouping" xml:space="preserve"><value>分组</value></data>
+  <data name="PropComment" xml:space="preserve"><value>注释</value></data>
+  <data name="PropNumberOf" xml:space="preserve"><value>{0}（共 {1}）</value></data>
+  <data name="SetInstrumental" xml:space="preserve"><value>设定为纯音乐</value></data>
+  <data name="SetInstrumentalDescription" xml:space="preserve"><value>不在本地或云端查找这首歌的歌词，歌词页面只显示歌曲名、专辑和艺术家</value></data>
+  <data name="EditLyrics" xml:space="preserve"><value>编辑</value></data>
+  <data name="EditLyricsWith" xml:space="preserve"><value>用其他应用编辑…</value></data>
+  <data name="EditLyricsUnavailable" xml:space="preserve"><value>歌词保存在本地后才能编辑</value></data>
+  <data name="SearchLyricsOnline" xml:space="preserve"><value>在云端搜索</value></data>
+  <data name="LyricsFromFile" xml:space="preserve"><value>来自歌曲文件夹里的 {0}</value></data>
+  <data name="LyricsFromLrclib" xml:space="preserve"><value>来自 LRCLIB：{0}</value></data>
+  <data name="LyricsLrclibInstrumental" xml:space="preserve"><value>LRCLIB 把这首歌标为纯音乐</value></data>
+  <data name="LyricsFileNotLoaded" xml:space="preserve"><value>歌曲文件夹里有 {0}，但首选项里的“加载本地歌词”已关闭，所以没有读取它</value></data>
+  <data name="LyricsFailed" xml:space="preserve"><value>无法连接 LRCLIB</value></data>
+  <data name="LyricsOpenFailed" xml:space="preserve"><value>无法打开歌词文件：{0}</value></data>
+  <data name="Retry" xml:space="preserve"><value>重试</value></data>
+  <data name="SearchLyricsTitle" xml:space="preserve"><value>在云端搜索歌词</value></data>
+  <data name="SearchSongTitle" xml:space="preserve"><value>歌曲名</value></data>
+  <data name="SearchArtistName" xml:space="preserve"><value>艺术家</value></data>
+  <data name="SearchNoResults" xml:space="preserve"><value>没有找到结果</value></data>
+  <data name="SearchFailed" xml:space="preserve"><value>搜索失败：{0}</value></data>
+  <data name="SelectResult" xml:space="preserve"><value>选择一个结果预览歌词</value></data>
+  <data name="ResultSynced" xml:space="preserve"><value>同步歌词</value></data>
+  <data name="ResultNotSynced" xml:space="preserve"><value>未同步</value></data>
+  <data name="ResultInUse" xml:space="preserve"><value>正在使用</value></data>
+  <data name="DownloadToLocal" xml:space="preserve"><value>下载到本地</value></data>
+  <data name="ReplaceLocalLyrics" xml:space="preserve"><value>替换本地歌词</value></data>
+  <data name="ReplaceLyricsConfirm" xml:space="preserve"><value>歌曲文件夹里的 {0} 会被替换。</value></data>
+  <data name="Replace" xml:space="preserve"><value>替换</value></data>
+  <data name="LyricsSaveFailed" xml:space="preserve"><value>无法保存歌词：{0}</value></data>
+</root>

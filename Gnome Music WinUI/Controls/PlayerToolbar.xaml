@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Controls.PlayerToolbar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Gnome_Music_WinUI.Controls"
+    xmlns:h="using:Gnome_Music_WinUI.Helpers"
+    Visibility="Collapsed">
+
+    <UserControl.Resources>
+        <!-- The song info while the lyrics are turned off: the same content, not a button -->
+        <Style x:Key="PlainButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="{TemplateBinding Background}"
+                            Content="{TemplateBinding Content}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- PlayerToolbar.ui: a GtkActionBar with song info (start), buttons and progress
+         (centre) and the repeat and volume buttons (end). It is on the window's base
+         fill, which it also keeps over the lyrics: they reach under it. Over the lyrics
+         it steps aside while the pointer rests (SetAway). -->
+    <Grid
+        x:Name="Bar"
+        Padding="6,7,6,6"
+        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+        <Grid.OpacityTransition>
+            <ScalarTransition />
+        </Grid.OpacityTransition>
+        <Grid.TranslationTransition>
+            <Vector3Transition />
+        </Grid.TranslationTransition>
+
+        <!-- Over the lyrics, the edge between their white page and the bar; it comes and
+             goes with the page -->
+        <Border
+            x:Name="LyricsEdge"
+            Margin="-6,-7,-6,0"
+            VerticalAlignment="Top"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0"
+            IsHitTestVisible="False"
+            Opacity="0">
+            <Border.OpacityTransition>
+                <ScalarTransition />
+            </Border.OpacityTransition>
+        </Border>
+
+        <!-- start: _song_info_box. Unlike GNOME Music, it is a button that shows and
+             hides the lyrics. -->
+        <Button
+            x:Name="SongInfo"
+            Padding="6"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Left"
+            AutomationProperties.Name="{x:Bind h:Strings.ShowLyrics}"
+            BorderThickness="0"
+            Click="OnSongInfoClick"
+            CornerRadius="8"
+            Style="{StaticResource SubtleButtonStyle}">
+            <ToolTipService.ToolTip>
+                <ToolTip>
+                    <StackPanel>
+                        <TextBlock x:Name="TipTitle" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TipArtist" />
+                    </StackPanel>
+                </ToolTip>
+            </ToolTipService.ToolTip>
+            <StackPanel
+                x:Name="SongInfoContent"
+                Orientation="Horizontal"
+                Spacing="8">
+                <controls:CoverArt
+                    x:Name="Cover"
+                    VerticalAlignment="Center"
+                    Radius="4"
+                    Size="74" />
+                <StackPanel
+                    x:Name="Labels"
+                    MaxWidth="220"
+                    VerticalAlignment="Center"
+                    Spacing="3">
+                    <TextBlock x:Name="TitleText" Style="{StaticResource StrongLabelStyle}" />
+                    <TextBlock x:Name="ArtistText" Style="{StaticResource SecondaryLabelStyle}" />
+                    <!-- The file's bit depth and sample rate, when the settings show it -->
+                    <TextBlock
+                        x:Name="FormatText"
+                        Style="{StaticResource SecondaryCaptionLabelStyle}"
+                        Typography.NumeralAlignment="Tabular"
+                        Visibility="Collapsed" />
+                </StackPanel>
+            </StackPanel>
+        </Button>
+
+        <!-- centre: _buttons_and_scale, kept centred against the whole bar. Unlike
+             GNOME Music, the repeat mode and the song's star flank the playback buttons. -->
+        <StackPanel
+            x:Name="CenterBox"
+            Margin="6"
+            VerticalAlignment="Center">
+            <StackPanel
+                x:Name="ButtonsRow"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="12">
+                <controls:RepeatModeButton />
+                <Button
+                    x:Name="PreviousButton"
+                    AutomationProperties.Name="{x:Bind h:Strings.Previous}"
+                    Click="OnPreviousClick"
+                    IsEnabled="False"
+                    Style="{StaticResource SubtleIconButtonStyle}"
+                    ToolTipService.ToolTip="{x:Bind h:Strings.Previous}">
+                    <FontIcon FontSize="16" Glyph="&#xF8AC;" />
+                </Button>
+                <!-- Play/pause is the primary action: an accent button in the color of
+                     the cover. The code sets the color of the brushes in the Default
+                     (dark) and Light dictionaries; high contrast keeps the system colors. -->
+                <Button
+                    x:Name="PlayButton"
+                    Click="OnPlayClick"
+                    IsEnabled="False"
+                    Style="{StaticResource LargeAccentButtonStyle}">
+                    <Button.Resources>
+                        <ResourceDictionary>
+                            <ResourceDictionary.ThemeDictionaries>
+                                <ResourceDictionary x:Key="Default">
+                                    <SolidColorBrush x:Key="AccentButtonBackground" Color="{ThemeResource SystemAccentColorLight2}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorLight2}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorLight2}" />
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="Light">
+                                    <SolidColorBrush x:Key="AccentButtonBackground" Color="{ThemeResource SystemAccentColorDark1}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorDark1}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorDark1}" />
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="HighContrast">
+                                    <SolidColorBrush x:Key="AccentButtonBackground" Color="{ThemeResource SystemColorHighlightColor}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{ThemeResource SystemColorButtonTextColor}" />
+                                    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                                </ResourceDictionary>
+                            </ResourceDictionary.ThemeDictionaries>
+                        </ResourceDictionary>
+                    </Button.Resources>
+                    <FontIcon
+                        x:Name="PlayIcon"
+                        FontSize="28"
+                        Glyph="&#xF5B0;" />
+                </Button>
+                <Button
+                    x:Name="NextButton"
+                    AutomationProperties.Name="{x:Bind h:Strings.Next}"
+                    Click="OnNextClick"
+                    IsEnabled="False"
+                    Style="{StaticResource SubtleIconButtonStyle}"
+                    ToolTipService.ToolTip="{x:Bind h:Strings.Next}">
+                    <FontIcon FontSize="16" Glyph="&#xF8AD;" />
+                </Button>
+                <!-- Starred, the star takes the color of the cover like the play button -->
+                <controls:StarToggle
+                    x:Name="Star"
+                    IsEnabled="False"
+                    StarredForeground="{ThemeResource NowPlayingBrush}" />
+            </StackPanel>
+
+            <!-- progress row: AdwClamp(1000), margin-top 12 -->
+            <controls:Clamp Margin="0,12,0,0" MaximumSize="1000">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        x:Name="ElapsedText"
+                        MinWidth="36"
+                        VerticalAlignment="Center"
+                        HorizontalTextAlignment="Right"
+                        Style="{StaticResource SecondaryCaptionLabelStyle}"
+                        Text="0:00"
+                        Typography.NumeralAlignment="Tabular" />
+                    <!-- The value and the thumb in the color of the cover, like the play button -->
+                    <Slider
+                        x:Name="ProgressSlider"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        IsEnabled="False"
+                        IsThumbToolTipEnabled="False"
+                        LargeChange="10"
+                        Maximum="1"
+                        Minimum="0"
+                        SmallChange="5"
+                        StepFrequency="0.01"
+                        ValueChanged="OnProgressValueChanged">
+                        <Slider.Resources>
+                            <ResourceDictionary>
+                                <ResourceDictionary.ThemeDictionaries>
+                                    <ResourceDictionary x:Key="Default">
+                                        <SolidColorBrush x:Key="SliderTrackValueFill" Color="{ThemeResource SystemAccentColorLight2}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorLight2}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorLight2}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackground" Color="{ThemeResource SystemAccentColorLight2}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorLight2}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorLight2}" />
+                                    </ResourceDictionary>
+                                    <ResourceDictionary x:Key="Light">
+                                        <SolidColorBrush x:Key="SliderTrackValueFill" Color="{ThemeResource SystemAccentColorDark1}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorDark1}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorDark1}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackground" Color="{ThemeResource SystemAccentColorDark1}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorDark1}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorDark1}" />
+                                    </ResourceDictionary>
+                                    <ResourceDictionary x:Key="HighContrast">
+                                        <SolidColorBrush x:Key="SliderTrackValueFill" Color="{ThemeResource SystemColorHighlightColor}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="{ThemeResource SystemColorHighlightColor}" />
+                                        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="{ThemeResource SystemColorHighlightColor}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackground" Color="{ThemeResource SystemColorButtonTextColor}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{ThemeResource SystemColorHighlightColor}" />
+                                        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{ThemeResource SystemColorHotlightColor}" />
+                                    </ResourceDictionary>
+                                </ResourceDictionary.ThemeDictionaries>
+                            </ResourceDictionary>
+                        </Slider.Resources>
+                    </Slider>
+                    <TextBlock
+                        x:Name="DurationText"
+                        Grid.Column="2"
+                        MinWidth="36"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SecondaryCaptionLabelStyle}"
+                        Text="0:00"
+                        Typography.NumeralAlignment="Tabular" />
+                </Grid>
+            </controls:Clamp>
+        </StackPanel>
+
+        <!-- end: the play queue, the mini player and the audio output (not in GNOME
+             Music), the volume -->
+        <StackPanel
+            x:Name="EndBox"
+            Height="34"
+            Margin="6"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <Button
+                x:Name="QueueButton"
+                AutomationProperties.Name="{x:Bind h:Strings.PlayQueue}"
+                Style="{StaticResource SubtleIconButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind h:Strings.PlayQueue}">
+                <FontIcon FontSize="16" Glyph="&#xE90B;" />
+                <Button.Flyout>
+                    <!-- An overlay above the bar that closes on a click outside or Esc.
+                         Solid like the toasts: only the title bar is acrylic. The list
+                         scrolls itself, so the presenter does not. -->
+                    <Flyout
+                        x:Name="QueueFlyout"
+                        Opening="OnQueueFlyoutOpening"
+                        Placement="TopEdgeAlignedRight">
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                                <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+                                <Setter Property="ScrollViewer.VerticalScrollMode" Value="Disabled" />
+                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <controls:PlayQueueView x:Name="QueueView" />
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <Button
+                x:Name="MiniPlayerButton"
+                AutomationProperties.Name="{x:Bind h:Strings.MiniPlayer}"
+                Click="OnMiniPlayerClick"
+                Style="{StaticResource SubtleIconButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind h:Strings.MiniPlayer}">
+                <!-- A picture in a window, as on the mini player's "Back to Full View" -->
+                <PathIcon Data="F0 M0,0 H20 V13 H0 Z M1,1 V12 H19 V1 Z M8,4.5 H18 V11 H8 Z M9,5.5 V10 H17 V5.5 Z M9.5,10 L11.5,7.5 L13.5,10 Z M14.5,7 A0.8,0.8 0 1 1 16.1,7 A0.8,0.8 0 1 1 14.5,7 Z" />
+            </Button>
+            <!-- The interface, exclusive mode and the device at hand, with the speaker
+                 glyph of Preferences → Music Output -->
+            <Button
+                x:Name="OutputButton"
+                AutomationProperties.Name="{x:Bind h:Strings.AudioOutput}"
+                Style="{StaticResource SubtleIconButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind h:Strings.AudioOutput}">
+                <FontIcon FontSize="16" Glyph="&#xE7F5;" />
+                <Button.Flyout>
+                    <!-- The system's flyout, as the volume has it; the picker keeps its own insets -->
+                    <Flyout
+                        x:Name="OutputFlyout"
+                        Opening="OnOutputFlyoutOpening"
+                        Placement="TopEdgeAlignedRight">
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <controls:OutputPicker x:Name="Output" />
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <controls:VolumeButton x:Name="Volume" />
+        </StackPanel>
+    </Grid>
+</UserControl>

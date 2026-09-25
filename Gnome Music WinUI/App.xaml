@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<Application
+    x:Class="Gnome_Music_WinUI.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Gnome_Music_WinUI"
+    RequestedTheme="Light">
+    <!-- Light only for now; remove RequestedTheme to follow the system theme again -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- The app's accent is the red-pink of its icon (#FF2D55), not the system's:
+                 the same hue in steps of OKLab lightness. Fills use Dark1 (5.1:1 with white
+                 glyphs), accent text Dark2 (7.3:1 on white); the Light steps are for a dark
+                 theme. High contrast keeps the system colors. -->
+            <Color x:Key="SystemAccentColor">#FF2D55</Color>
+            <Color x:Key="SystemAccentColorLight1">#FF7D85</Color>
+            <Color x:Key="SystemAccentColorLight2">#FEAAAC</Color>
+            <Color x:Key="SystemAccentColorLight3">#FED1D1</Color>
+            <Color x:Key="SystemAccentColorDark1">#DB0040</Color>
+            <Color x:Key="SystemAccentColorDark2">#B00032</Color>
+            <Color x:Key="SystemAccentColorDark3">#850023</Color>
+
+            <!-- The playing song in lists: the color of its cover, which PlayerToolbar
+                 paints into the Default (dark) and Light brushes. High contrast keeps the
+                 system's accent text color. -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="NowPlayingBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="NowPlayingBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="NowPlayingBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

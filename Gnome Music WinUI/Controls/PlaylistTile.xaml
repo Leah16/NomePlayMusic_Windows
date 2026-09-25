@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Controls.PlaylistTile"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- PlaylistTile.ui: the playlist icon in a 36 px tile and the title. Fluent keeps
+         circles for people, so the tile is a rounded square. -->
+    <Grid ColumnSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Border
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center"
+            Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="{ThemeResource ControlCornerRadius}">
+            <FontIcon FontSize="16" Glyph="{x:Bind Playlist.Glyph, Mode=OneWay}" />
+        </Border>
+        <TextBlock
+            Grid.Column="1"
+            Margin="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource BodyLabelStyle}"
+            Text="{x:Bind Playlist.Title, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind Playlist.Title, Mode=OneWay}" />
+    </Grid>
+</UserControl>

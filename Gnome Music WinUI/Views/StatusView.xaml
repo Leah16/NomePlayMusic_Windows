@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Views.StatusView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Gnome_Music_WinUI.Controls"
+    xmlns:h="using:Gnome_Music_WinUI.Helpers">
+
+    <UserControl.Resources>
+        <!-- Side tiles of the illustration: white cards with an accent glyph -->
+        <Style x:Key="IllustrationCardStyle" TargetType="Border">
+            <Setter Property="Width" Value="120" />
+            <Setter Property="Height" Value="120" />
+            <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+    </UserControl.Resources>
+
+    <!-- StatusNavigationPage.ui, state EMPTY: the welcome block in an AdwClamp(620) -->
+    <Border Style="{StaticResource ContentLayerStyle}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <controls:Clamp
+                Margin="12,36"
+                VerticalAlignment="Center"
+                MaximumSize="620"
+                TighteningThreshold="500">
+                <StackPanel Spacing="18">
+                    <!-- Stand-in for welcome-music.svg -->
+                    <Grid
+                        x:Name="Illustration"
+                        Height="200"
+                        HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Margin="0,40,-18,0" Style="{StaticResource IllustrationCardStyle}">
+                            <FontIcon
+                                FontSize="52"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Glyph="&#xE7F6;" />
+                        </Border>
+                        <Border
+                            Grid.Column="1"
+                            Width="150"
+                            Height="150"
+                            Canvas.ZIndex="1"
+                            Background="{ThemeResource AccentFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource AccentControlElevationBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="16">
+                            <FontIcon
+                                FontSize="72"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                Glyph="&#xE93C;" />
+                        </Border>
+                        <Border
+                            Grid.Column="2"
+                            Margin="-18,40,0,0"
+                            Style="{StaticResource IllustrationCardStyle}">
+                            <FontIcon
+                                FontSize="52"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Glyph="&#xEC4F;" />
+                        </Border>
+                    </Grid>
+
+                    <TextBlock
+                        x:Name="TitleText"
+                        HorizontalAlignment="Center"
+                        HorizontalTextAlignment="Center"
+                        Style="{StaticResource TitleLabelStyle}"
+                        Text="{x:Bind h:Strings.WelcomeToMusic}"
+                        TextWrapping="WrapWholeWords" />
+                    <TextBlock
+                        x:Name="DescriptionText"
+                        HorizontalAlignment="Center"
+                        HorizontalTextAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap">
+                        <Run x:Name="DescriptionBefore" /><Hyperlink x:Name="FolderLink" Click="OnFolderLinkClick"><Run x:Name="FolderLinkText" /></Hyperlink><Run x:Name="DescriptionAfter" />
+                    </TextBlock>
+                    <!-- Windows port: there is no indexer configuration, so offer to add folders -->
+                    <Button
+                        x:Name="AddFolderButton"
+                        HorizontalAlignment="Center"
+                        Click="OnAddFolderClick"
+                        Content="{x:Bind h:Strings.AddFolder}"
+                        Style="{StaticResource LargeAccentButtonStyle}" />
+                </StackPanel>
+            </controls:Clamp>
+        </ScrollViewer>
+    </Border>
+</UserControl>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Controls.OutputPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:audio="using:Gnome_Music_WinUI.Services.Audio"
+    xmlns:h="using:Gnome_Music_WinUI.Helpers"
+    Width="320">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- The accent in the color of the song's cover, like the play button: the
+                 interface's pill, the device's pill, exclusive mode switched on and the
+                 ring while the devices are listed. The player bar paints the brushes of the
+                 Default (dark) and Light dictionaries; high contrast keeps the system colors. -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="ProgressRingForegroundThemeBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="SelectorBarItemPillFill" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPointerOverBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPressedBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorLight2}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorLight2}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ProgressRingForegroundThemeBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="SelectorBarItemPillFill" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPointerOverBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPressedBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Opacity="0.9" Color="{ThemeResource SystemAccentColorDark1}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Opacity="0.8" Color="{ThemeResource SystemAccentColorDark1}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="ProgressRingForegroundThemeBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="SelectorBarItemPillFill" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPointerOverBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="ListViewItemSelectionIndicatorPressedBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Color="{ThemeResource SystemColorButtonTextColor}" />
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Color="{ThemeResource SystemColorButtonTextColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <!-- Names only: ListViewItem's own inset keeps the selection pill clear of them -->
+            <Style x:Key="DeviceItemStyle" BasedOn="{StaticResource SidebarItemStyle}" TargetType="ListViewItem">
+                <Setter Property="Padding" Value="16,0,12,0" />
+            </Style>
+            <Style x:Key="SectionTitleStyle" BasedOn="{StaticResource StrongLabelStyle}" TargetType="TextBlock">
+                <Setter Property="Margin" Value="16,0,16,6" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- The player bar's audio output (not in GNOME Music): Preferences → Music Output
+         in brief, the interface, exclusive mode (WASAPI) and the device, applied at once.
+         What the device takes and DSD are in the preferences. -->
+    <StackPanel Padding="0,14,0,8">
+        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="{x:Bind h:Strings.AudioInterface}" />
+        <SelectorBar
+            x:Name="ApiBar"
+            Margin="8,0"
+            AutomationProperties.Name="{x:Bind h:Strings.AudioInterface}"
+            SelectionChanged="OnApiChanged">
+            <SelectorBarItem Text="WASAPI" />
+            <SelectorBarItem Text="DirectSound" />
+            <SelectorBarItem Text="ASIO" />
+        </SelectorBar>
+
+        <Grid
+            x:Name="ExclusiveRow"
+            MinHeight="40"
+            Padding="16,0,12,0"
+            ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center" Text="{x:Bind h:Strings.ExclusiveMode}" />
+            <ToggleSwitch
+                x:Name="ExclusiveSwitch"
+                Grid.Column="1"
+                AutomationProperties.Name="{x:Bind h:Strings.ExclusiveMode}"
+                Style="{StaticResource RowSwitchStyle}"
+                Toggled="OnExclusiveToggled" />
+        </Grid>
+
+        <Border
+            Height="1"
+            Margin="0,8,0,12"
+            Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="{x:Bind h:Strings.Device}" />
+        <Grid MinHeight="38">
+            <ListView
+                x:Name="DeviceList"
+                MaxHeight="228"
+                Padding="4,0"
+                AutomationProperties.Name="{x:Bind h:Strings.Device}"
+                ItemContainerStyle="{StaticResource DeviceItemStyle}"
+                SelectionChanged="OnDeviceChanged"
+                SelectionMode="Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="audio:AudioDevice">
+                        <TextBlock
+                            Margin="0,8"
+                            MaxLines="2"
+                            Text="{x:Bind Name}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <ProgressRing
+                x:Name="LoadingRing"
+                Width="20"
+                Height="20"
+                IsActive="False" />
+            <TextBlock
+                x:Name="EmptyText"
+                Margin="16,0"
+                VerticalAlignment="Center"
+                Style="{StaticResource SecondaryLabelStyle}"
+                Text="{x:Bind h:Strings.NoAsioDriver}"
+                Visibility="Collapsed" />
+        </Grid>
+    </StackPanel>
+</UserControl>

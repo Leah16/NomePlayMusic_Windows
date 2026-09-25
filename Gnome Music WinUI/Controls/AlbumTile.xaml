@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Controls.AlbumTile"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Gnome_Music_WinUI.Controls"
+    xmlns:h="using:Gnome_Music_WinUI.Helpers"
+    HorizontalAlignment="Center"
+    VerticalAlignment="Top">
+
+    <!-- AlbumTile.ui: 192 px cover (.tile-image, margin 6), centred title and artist -->
+    <StackPanel Width="{x:Bind TileWidth(CoverSize), Mode=OneWay}">
+        <StackPanel.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Click="OnPlayClick" Text="{x:Bind h:Strings.MenuPlay}" />
+                <MenuFlyoutItem Click="OnFavoriteClick" Text="{x:Bind h:Strings.AddToFavoriteSongs}" />
+                <MenuFlyoutItem Click="OnAddToPlaylistClick" Text="{x:Bind h:Strings.AddToPlaylistEllipsis}" />
+            </MenuFlyout>
+        </StackPanel.ContextFlyout>
+
+        <controls:CoverArt
+            Margin="6"
+            HorizontalAlignment="Center"
+            Album="{x:Bind Album, Mode=OneWay}"
+            Radius="8"
+            Size="{x:Bind CoverSize, Mode=OneWay}" />
+        <TextBlock
+            x:Name="TitleText"
+            Margin="6,0"
+            HorizontalAlignment="Center"
+            HorizontalTextAlignment="Center"
+            Style="{StaticResource BodyLabelStyle}"
+            Text="{x:Bind Album.Title, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind Album.Title, Mode=OneWay}" />
+        <TextBlock
+            Margin="6,2,6,0"
+            HorizontalAlignment="Center"
+            HorizontalTextAlignment="Center"
+            Style="{StaticResource SecondaryCaptionLabelStyle}"
+            Text="{x:Bind Album.Artist, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind Album.Artist, Mode=OneWay}" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later -->
+<UserControl
+    x:Class="Gnome_Music_WinUI.Controls.SongRow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Gnome_Music_WinUI.Controls"
+    xmlns:h="using:Gnome_Music_WinUI.Helpers"
+    HorizontalContentAlignment="Stretch">
+
+    <!-- SongWidget.ui: .songwidget { padding: 12px }, spacing 6 -->
+    <Grid
+        x:Name="RowGrid"
+        Padding="12,8,12,8"
+        Background="Transparent"
+        ColumnSpacing="6">
+        <VisualStateManager.VisualStateGroups>
+            <!-- The playing song is shown in the color of its cover (App.xaml), a song
+                 that failed to play gets the critical color on its icon -->
+            <VisualStateGroup x:Name="PlaybackStates">
+                <VisualState x:Name="Idle" />
+                <VisualState x:Name="Playing">
+                    <VisualState.Setters>
+                        <Setter Target="PlayIcon.Foreground" Value="{ThemeResource NowPlayingBrush}" />
+                        <Setter Target="TitleText.Foreground" Value="{ThemeResource NowPlayingBrush}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Failed">
+                    <VisualState.Setters>
+                        <Setter Target="PlayIcon.Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="HandleColumn" Width="0" />
+            <ColumnDefinition Width="48" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="ArtistColumn" Width="0" />
+            <ColumnDefinition x:Name="AlbumColumn" Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 1: drag handle (user playlists) -->
+        <FontIcon
+            x:Name="DragHandle"
+            FontSize="16"
+            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+            Glyph="&#xE76F;"
+            Visibility="Collapsed" />
+
+        <!-- 2: play indicator and track number (homogeneous 48 px box) -->
+        <Grid Grid.Column="1" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <FontIcon
+                x:Name="PlayIcon"
+                HorizontalAlignment="Center"
+                FontSize="14"
+                Glyph="&#xF5B0;"
+                Visibility="Collapsed" />
+            <TextBlock
+                x:Name="NumberText"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Style="{StaticResource SecondaryLabelStyle}"
+                Typography.NumeralAlignment="Tabular" />
+        </Grid>
+
+        <!-- 3: title -->
+        <TextBlock
+            x:Name="TitleText"
+            Grid.Column="2"
+            Margin="9,0,0,0"
+            VerticalAlignment="Center"
+            Style="{StaticResource BodyLabelStyle}" />
+
+        <!-- 4: artist (variant B) -->
+        <TextBlock
+            x:Name="ArtistText"
+            Grid.Column="3"
+            Margin="9,0,0,0"
+            VerticalAlignment="Center"
+            Style="{StaticResource SecondaryLabelStyle}"
+            Visibility="Collapsed" />
+
+        <!-- 5: album (variant B) and duration -->
+        <Grid Grid.Column="4" ColumnSpacing="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                x:Name="AlbumText"
+                VerticalAlignment="Center"
+                Style="{StaticResource SecondaryLabelStyle}"
+                Visibility="Collapsed" />
+            <TextBlock
+                x:Name="DurationText"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Style="{StaticResource SecondaryLabelStyle}"
+                Typography.NumeralAlignment="Tabular" />
+        </Grid>
+
+        <!-- 6: star (startoggle.py) -->
+        <controls:StarToggle
+            x:Name="Star"
+            Grid.Column="5"
+            Margin="12,0"
+            VerticalAlignment="Center" />
+
+        <!-- 7: song menu (SongWidgetMenu.ui) -->
+        <Button
+            x:Name="MenuButton"
+            Grid.Column="6"
+            AutomationProperties.Name="{x:Bind h:Strings.Menu}"
+            Style="{StaticResource SubtleIconButtonStyle}">
+            <FontIcon FontSize="16" Glyph="&#xE712;" />
+            <Button.Flyout>
+                <MenuFlyout x:Name="RowMenu" Opening="OnMenuOpening" Placement="Bottom">
+                    <MenuFlyoutItem Click="OnPlayClick" Text="{x:Bind h:Strings.MenuPlay}" />
+                    <MenuFlyoutItem Click="OnAddToPlaylistClick" Text="{x:Bind h:Strings.AddToPlaylistEllipsis}" />
+                    <MenuFlyoutItem
+                        x:Name="RemoveItem"
+                        Click="OnRemoveClick"
+                        Text="{x:Bind h:Strings.RemoveFromPlaylist}"
+                        Visibility="Collapsed" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Click="OnOpenLocationClick" Text="{x:Bind h:Strings.OpenLocation}" />
+                    <MenuFlyoutItem Click="OnPropertiesClick" Text="{x:Bind h:Strings.Properties}" />
+                </MenuFlyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</UserControl>

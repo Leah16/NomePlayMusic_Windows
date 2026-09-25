@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Gnome Music WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Gnome Music WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

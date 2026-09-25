@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-2.0-or-later
+     Shared resources in the Fluent 2 design language (https://fluent2.microsoft.design):
+     WinUI's own tokens for color, materials and elevation (they carry the light, dark
+     and high contrast values), the Windows type ramp, rectangles with 4 px corners
+     (8 px for large elements and cards, none at the window edges), circles only for
+     people, and strokes instead of shadows to set surfaces apart. No Mica: the window
+     is opaque, and each layer is a lighter solid fill than the one below it (base,
+     content layer, cards); the title bar is acrylic. The layout still follows GNOME
+     Music. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Toasts float above the content (flyout elevation) -->
+    <ThemeShadow x:Key="ToastShadow" />
+
+    <!-- ============================================================== -->
+    <!-- Surfaces                                                        -->
+    <!-- ============================================================== -->
+
+    <!-- The content layer, a step lighter than the window's base and outlined by a
+         stroke (NavigationView's content area). Full width, so no rounded corners at the
+         window edges. -->
+    <Style x:Key="ContentLayerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,1" />
+    </Style>
+
+    <!-- Next to a sidebar, which stays on the base: the inner corners are rounded,
+         like NavigationView's content area in Left mode. -->
+    <Style x:Key="SplitContentLayerStyle" BasedOn="{StaticResource ContentLayerStyle}" TargetType="Border">
+        <Setter Property="BorderThickness" Value="1,1,0,1" />
+        <Setter Property="CornerRadius" Value="8,0,0,8" />
+    </Style>
+
+    <!-- Cards group related rows (the songs of a disc, preference groups): the
+         lightest layer, white -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{ThemeResource OverlayCornerRadius}" />
+    </Style>
+
+    <!-- A tag (pill): the version in About -->
+    <Style x:Key="TagStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="10,2,10,3" />
+    </Style>
+
+    <!-- A key in the keyboard shortcuts: a small control with an elevation edge -->
+    <Style x:Key="KeyCapStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ControlElevationBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+        <Setter Property="MinWidth" Value="26" />
+        <Setter Property="Padding" Value="7,2,7,3" />
+    </Style>
+
+    <!-- ============================================================== -->
+    <!-- Typography: the Windows type ramp (Segoe UI Variable)          -->
+    <!-- Single-line labels trim with an ellipsis.                      -->
+    <!-- ============================================================== -->
+
+    <!-- Title, 28 px semibold: album and playlist titles, status pages -->
+    <Style x:Key="TitleLabelStyle" BasedOn="{StaticResource TitleTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- Subtitle, 20 px semibold: the album artist, search sections -->
+    <Style x:Key="SubtitleLabelStyle" BasedOn="{StaticResource SubtitleTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- Body strong, 14 px semibold: headings and emphasis -->
+    <Style x:Key="StrongLabelStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- Body, 14 px -->
+    <Style x:Key="BodyLabelStyle" BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- Body in the secondary text color: details, descriptions -->
+    <Style x:Key="SecondaryLabelStyle" BasedOn="{StaticResource BodyLabelStyle}" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <!-- Caption, 12 px, secondary: artist names under tiles, times, hints -->
+    <Style x:Key="SecondaryCaptionLabelStyle" BasedOn="{StaticResource CaptionTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <!-- The description under a setting's name (preferences, song properties) -->
+    <Style x:Key="RowDescriptionStyle" BasedOn="{StaticResource SecondaryCaptionLabelStyle}" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- A setting's switch alone: ToggleSwitch keeps 154 px for its on/off text even
+         when it has none, which would push it away from the row's end -->
+    <Style x:Key="RowSwitchStyle" TargetType="ToggleSwitch">
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Width" Value="44" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="OnContent" Value="" />
+        <Setter Property="OffContent" Value="" />
+    </Style>
+
+    <!-- Icon states set from code; styles keep them in step with the theme -->
+    <Style x:Key="AccentIconStyle" TargetType="FontIcon">
+        <Setter Property="Foreground" Value="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+    </Style>
+    <Style x:Key="SecondaryIconStyle" TargetType="FontIcon">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <!-- ============================================================== -->
+    <!-- Buttons: subtle (no fill until hovered), standard (fill and    -->
+    <!-- elevation edge) and accent (the primary action)                -->
+    <!-- ============================================================== -->
+
+    <!-- 34 px icon buttons: star, song menu, previous/next, repeat, volume -->
+    <Style x:Key="SubtleIconButtonStyle" BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- 44 px buttons of the album and playlist headers; large, so 8 px corners -->
+    <Style x:Key="LargeIconButtonStyle" BasedOn="{StaticResource DefaultButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style x:Key="LargeAccentIconButtonStyle" BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- Large accent button: the player's play/pause, the welcome page's action -->
+    <Style x:Key="LargeAccentButtonStyle" BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+        <Setter Property="Padding" Value="32,10" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- Title bar buttons: subtle -->
+    <Style x:Key="TitleBarButtonStyle" BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <!-- Checked, a toggle button shows the accent color; the subtle unchecked
+         states are set in the button's resources (MainWindow.xaml). -->
+    <Style x:Key="TitleBarToggleButtonStyle" BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============================================================== -->
+    <!-- Lists                                                          -->
+    <!-- ============================================================== -->
+
+    <!-- Rows of a list inside a card: no fill of their own, only the Fluent hover
+         and pressed plates -->
+    <Style x:Key="CardListItemStyle" BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- Rows of the artists and playlists sidebars (navigation items) -->
+    <Style x:Key="SidebarItemStyle" BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- Tiles of the albums grid and the search results -->
+    <Style x:Key="TileGridViewItemStyle" BasedOn="{StaticResource DefaultGridViewItemStyle}" TargetType="GridViewItem">
+        <Setter Property="Margin" Value="3,3,3,9" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="CornerRadius" Value="{ThemeResource OverlayCornerRadius}" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+</ResourceDictionary>
