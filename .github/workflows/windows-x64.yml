@@ -1,0 +1,108 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# The portable Windows x64 version: unpackaged and self-contained (.NET and the Windows
+# App SDK included), zipped. Every push to main builds it (the zip is kept as a workflow
+# artifact); a version tag (v1.2.3), or a run by hand with a version, also publishes it
+# as a GitHub release.
+name: Windows x64
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.2.0 (tags this commit v1.2.0). Empty: build only.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # A tag v1.2.3 or the version given by hand is released; other builds keep the
+      # project's version with the run number after it.
+      - name: Version
+        id: version
+        shell: pwsh
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          $release = ''
+          if ($env:GITHUB_REF_TYPE -eq 'tag') { $release = $env:GITHUB_REF_NAME }
+          elseif ($env:INPUT_VERSION) { $release = $env:INPUT_VERSION.Trim() }
+          $release = $release.TrimStart('v')
+          if ($release -and $release -notmatch '^\d+\.\d+\.\d+$') {
+            throw "The version must look like 1.2.3, not '$release'."
+          }
+          if ($release) {
+            "prefix=$release" >> $env:GITHUB_OUTPUT
+            "suffix=" >> $env:GITHUB_OUTPUT
+            "name=$release" >> $env:GITHUB_OUTPUT
+            "tag=v$release" >> $env:GITHUB_OUTPUT
+          } else {
+            "prefix=1.0.0" >> $env:GITHUB_OUTPUT
+            "suffix=ci.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_OUTPUT
+            "name=ci.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_OUTPUT
+            "tag=" >> $env:GITHUB_OUTPUT
+          }
+
+      # Unpackaged (no MSIX, so no certificate to install) and self-contained. Not
+      # ReadyToRun, like the builds tested by hand.
+      - name: Publish
+        shell: pwsh
+        run: >
+          dotnet publish "Gnome Music WinUI/Gnome Music WinUI.csproj"
+          -c Release -r win-x64 -p:Platform=x64
+          -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true --self-contained true
+          -p:PublishReadyToRun=false
+          -p:VersionPrefix=${{ steps.version.outputs.prefix }}
+          -p:VersionSuffix=${{ steps.version.outputs.suffix }}
+          -o publish -nologo
+
+      # One folder in the zip, with the license and the README next to the program.
+      - name: Zip
+        id: zip
+        shell: pwsh
+        run: |
+          $name = "NomePlayMusic-${{ steps.version.outputs.name }}-win-x64"
+          Rename-Item publish $name
+          Copy-Item COPYING, README.md $name
+          Compress-Archive -Path $name -DestinationPath "$name.zip" -CompressionLevel Optimal
+          "file=$name.zip" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.zip.outputs.file }}
+          path: ${{ steps.zip.outputs.file }}
+          if-no-files-found: error
+
+      - name: Release
+        if: steps.version.outputs.tag != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @'
+          Portable Windows x64 build: unzip it anywhere and run `Gnome Music WinUI.exe` (Windows 10 version 1809 or later). Nothing to install: .NET and the Windows App SDK are included. Settings, playlists and the library cache are kept in `%LOCALAPPDATA%\GnomeMusicWinUI`.
+
+          便携版（Windows x64）：解压到任意位置，运行 `Gnome Music WinUI.exe`（需要 Windows 10 1809 或更高版本）。无需安装，已包含 .NET 和 Windows App SDK。设置、播放列表和媒体库缓存保存在 `%LOCALAPPDATA%\GnomeMusicWinUI`。
+          '@
+          Set-Content notes.md $notes -Encoding utf8
+          gh release create "${{ steps.version.outputs.tag }}" "${{ steps.zip.outputs.file }}" `
+            --title "Nome Play Music ${{ steps.version.outputs.name }}" `
+            --notes-file notes.md --generate-notes --target $env:GITHUB_SHA

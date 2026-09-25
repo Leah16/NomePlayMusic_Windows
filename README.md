@@ -9,6 +9,14 @@ GSettings.
 The UI is localized in English and Simplified Chinese; the Chinese strings are GNOME's
 own `zh_CN` translation.
 
+## Download
+
+Portable Windows x64 builds are on the
+[Releases](https://github.com/Leah16/NomePlayMusic_Windows/releases) page: unzip one
+anywhere and run `Gnome Music WinUI.exe` (Windows 10 1809 or later). Nothing to install:
+.NET and the Windows App SDK are included. Settings, playlists and the library cache are
+kept in `%LOCALAPPDATA%\GnomeMusicWinUI`.
+
 ## Features
 
 - **Albums**: grid of all albums sorted by title (192 px covers, 1–10 stretched columns),
@@ -209,12 +217,20 @@ application development* workload (or the .NET 8+ SDK), Windows App SDK 2.5.
 - By default the Windows *Music* folder is scanned; add other folders under
   ☰ (Preferences) → Music Folders, or from the welcome page.
 - App data (library cache, playlists, statistics, cover cache, `gnome-music.log`)
-  lives in the package's `LocalState` folder; lyrics files live next to the songs.
-- To distribute it, use *Package and Publish → Create App Packages* in Visual Studio.
-  Release builds are compiled ReadyToRun but **not trimmed**: the collections and
-  model objects bound to XAML lists get their COM wrappers through CsWinRT's
-  reflection fallback, which the trimmer removes, so a trimmed build fails at start-up
-  (see the comment in the `.csproj`).
+  lives in the package's `LocalState` folder (unpackaged: `%LOCALAPPDATA%\GnomeMusicWinUI`);
+  lyrics files live next to the songs.
+- To distribute it as a package, use *Package and Publish → Create App Packages* in
+  Visual Studio. Release builds are **not trimmed**: the collections and model objects
+  bound to XAML lists get their COM wrappers through CsWinRT's reflection fallback,
+  which the trimmer removes, so a trimmed build fails at start-up (see the comment in
+  the `.csproj`).
+- The portable version (unpackaged, self-contained, as on the Releases page) is built by
+  GitHub Actions (`.github/workflows/windows-x64.yml`): on every push to `main` (kept as
+  a workflow artifact), and published as a release for a version tag (`v1.2.3`) or when
+  the workflow is run by hand with a version. The same build locally:
+  `dotnet publish "Gnome Music WinUI/Gnome Music WinUI.csproj" -c Release -r win-x64
+  -p:Platform=x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true
+  --self-contained true -p:PublishReadyToRun=false -o publish`.
 
 Supported formats are those Windows can decode: MP3, AAC/M4A (incl. ALAC), FLAC, WAV,
 WMA, and Ogg/Opus when the corresponding Windows media extensions are installed; and
