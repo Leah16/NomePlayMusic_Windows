@@ -3,7 +3,7 @@
 # The portable Windows x64 version: unpackaged and self-contained (.NET and the Windows
 # App SDK included), zipped. Every push to main builds it (the zip is kept as a workflow
 # artifact); a version tag (v1.2.3), or a run by hand with a version, also publishes it
-# as a GitHub release.
+# as a GitHub release, with release-notes/v1.2.3.md in its notes when there is one.
 name: Windows x64
 
 on:
@@ -96,6 +96,8 @@ jobs:
           path: ${{ steps.zip.outputs.file }}
           if-no-files-found: error
 
+      # The notes: how to run it, then what changed (the version's file in release-notes,
+      # when there is one), then GitHub's generated notes (the full changelog's link).
       - name: Release
         if: steps.version.outputs.tag != ''
         shell: pwsh
@@ -107,6 +109,8 @@ jobs:
 
           便携版（Windows x64）：解压到任意位置，运行 `Gnome Music WinUI.exe`（需要 Windows 10 1809 或更高版本）。无需安装，已包含 .NET 和 Windows App SDK。设置、播放列表和媒体库缓存保存在 `%LOCALAPPDATA%\GnomeMusicWinUI`。
           '@
+          $changes = 'release-notes/${{ steps.version.outputs.tag }}.md'
+          if (Test-Path $changes) { $notes += "`n`n" + (Get-Content $changes -Raw -Encoding utf8) }
           Set-Content notes.md $notes -Encoding utf8
           gh release create "${{ steps.version.outputs.tag }}" "${{ steps.zip.outputs.file }}" `
             --title "Nome Play Music ${{ steps.version.outputs.name }}" `
