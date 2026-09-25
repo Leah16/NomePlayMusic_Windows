@@ -23,10 +23,6 @@ namespace Gnome_Music_WinUI.Controls;
 /// </summary>
 public sealed partial class PlayerToolbar : UserControl
 {
-    /// <summary>The lyrics page fades in and out this fast (LyricsView's storyboards).</summary>
-    private static readonly TimeSpan PageInDuration = TimeSpan.FromMilliseconds(250);
-    private static readonly TimeSpan PageOutDuration = TimeSpan.FromMilliseconds(167);
-
     private static readonly TimeSpan AwayDuration = TimeSpan.FromMilliseconds(250);
     private static readonly TimeSpan BackDuration = TimeSpan.FromMilliseconds(150);
 
@@ -64,7 +60,6 @@ public sealed partial class PlayerToolbar : UserControl
         ProgressSlider.AddHandler(PointerCaptureLostEvent, new PointerEventHandler((_, _) => EndDrag()), true);
 
         Bar.SizeChanged += (_, _) => LayOutBar();
-        SongInfo.SizeChanged += (_, _) => LayOutBar();
         EndBox.SizeChanged += (_, _) => LayOutBar();
 
         // The settings turn the mini player, the output button, the volume and the lyrics
@@ -116,11 +111,16 @@ public sealed partial class PlayerToolbar : UserControl
     /// window is too narrow for that, the song's labels get shorter, then only its cover
     /// shows, then nothing; at the narrowest the centre part sits between the left edge
     /// and the end part, with its buttons closer together. (The minimum width of the
-    /// window keeps the cover and the labels; the rest is for larger text.)
+    /// window keeps the cover and the labels; the rest is for larger text.) Unlike
+    /// GNOME Music, the song's side is as wide as its labels may be, not as its texts
+    /// are, so the progress bar keeps its length from song to song, with the format line
+    /// or without: only the window's width sets it. The labels may be 200 px wide, less
+    /// where that would leave the centre part under 360 px; longer texts end in an
+    /// ellipsis.
     /// </summary>
     private void LayOutBar()
     {
-        const double Gap = 6, LabelsMinWidth = 48, LabelsMaxWidth = 220, Spacing = 12, TightSpacing = 4;
+        const double Gap = 6, LabelsMinWidth = 48, LabelsMaxWidth = 200, CentreMinWidth = 360, Spacing = 12, TightSpacing = 4;
         double width = Bar.ActualWidth - Bar.Padding.Left - Bar.Padding.Right;
         double end = EndBox.ActualWidth + EndBox.Margin.Left + EndBox.Margin.Right;
         double buttons = ButtonsRow.Children.Sum(c => c.DesiredSize.Width) + (ButtonsRow.Children.Count - 1) * Spacing;
@@ -129,17 +129,18 @@ public sealed partial class PlayerToolbar : UserControl
         double side = (width - buttons) / 2 - Gap;
         double cover = SongInfo.Margin.Left + SongInfo.Padding.Left + Cover.Width + SongInfo.Padding.Right + SongInfo.Margin.Right;
         double labels = side - cover - SongInfoContent.Spacing;
+        double roomy = (width - CentreMinWidth) / 2 - Gap - cover - SongInfoContent.Spacing;
         bool centred = side >= end;
-        SongInfo.Visibility = centred && side >= cover ? Visibility.Visible : Visibility.Collapsed;
-        Labels.Visibility = centred && labels >= LabelsMinWidth ? Visibility.Visible : Visibility.Collapsed;
-        Labels.MaxWidth = Math.Clamp(labels, LabelsMinWidth, LabelsMaxWidth);
+        bool showInfo = centred && side >= cover;
+        bool showLabels = centred && labels >= LabelsMinWidth;
+        SongInfo.Visibility = showInfo ? Visibility.Visible : Visibility.Collapsed;
+        Labels.Visibility = showLabels ? Visibility.Visible : Visibility.Collapsed;
+        Labels.MaxWidth = Math.Clamp(Math.Min(labels, roomy), LabelsMinWidth, LabelsMaxWidth);
         ButtonsRow.Spacing = centred || width - end - 2 * Gap >= buttons ? Spacing : TightSpacing;
 
         if (centred)
         {
-            double start = SongInfo.Visibility == Visibility.Visible
-                ? SongInfo.ActualWidth + SongInfo.Margin.Left + SongInfo.Margin.Right
-                : 0;
+            double start = !showInfo ? 0 : cover + (showLabels ? SongInfoContent.Spacing + Labels.MaxWidth : 0);
             double margin = Math.Max(start, end) + Gap;
             CenterBox.Margin = new Thickness(margin, 6, margin, 6);
         }
@@ -287,13 +288,11 @@ public sealed partial class PlayerToolbar : UserControl
             App.MainWindow?.ToggleLyrics();
     }
 
-    /// <summary>Over the lyrics the bar has an edge, which fades with their page.</summary>
+    /// <summary>The song info says whether it shows or hides the lyrics.</summary>
     public void SetLyricsOpen(bool open)
     {
         if (_settings.LyricsEnabled)
             AutomationProperties.SetName(SongInfo, open ? Strings.HideLyrics : Strings.ShowLyrics);
-        LyricsEdge.OpacityTransition.Duration = open ? PageInDuration : PageOutDuration;
-        LyricsEdge.Opacity = open ? 1 : 0;
     }
 
     /// <summary>

@@ -42,7 +42,8 @@
             </SystemBackdropElement>
 
             <!-- Back (go-previous-symbolic), global: out of pushed pages, search and back
-                 to the views shown before; there on every page but the lyrics -->
+                 to the views shown before; there only while it leads somewhere, never on
+                 the status page nor over the lyrics -->
             <Button
                 x:Name="BackButton"
                 Margin="6,0,0,0"
@@ -174,12 +175,18 @@
                 Margin="0,0,6,0"
                 IsTabStop="False"
                 SelectionChanged="OnPreferencesSwitcherSelectionChanged">
-                <!-- As wide as the menu button was: nothing in the bar moves -->
+                <!-- As wide as the menu button was: nothing in the bar moves. Not a tab
+                     stop: a selector bar selects the item that gets the keyboard focus,
+                     and with an empty library (no view switcher, search disabled) the
+                     window's first focus, or the focus leaving the view switcher, landed
+                     here and opened the preferences over the welcome page, again and
+                     again. The keyboard has Ctrl+, instead. -->
                 <SelectorBarItem
                     x:Name="PreferencesItem"
                     Width="36"
                     MinWidth="0"
                     AutomationProperties.Name="{x:Bind h:Strings.Preferences}"
+                    IsTabStop="False"
                     Tag="preferences"
                     Tapped="OnPreferencesItemTapped"
                     ToolTipService.ToolTip="{x:Bind h:Strings.Preferences}">
@@ -208,6 +215,24 @@
             x:Name="Lyrics"
             Grid.RowSpan="3"
             Padding="0,48,0,0" />
+
+        <!-- Over the lyrics, where the title bar's back button is: back out of them. It
+             steps aside with the player bar and the caption buttons. -->
+        <Button
+            x:Name="LyricsBackButton"
+            Margin="6,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            AutomationProperties.Name="{x:Bind h:Strings.Back}"
+            Click="OnLyricsBackClick"
+            Style="{StaticResource TitleBarButtonStyle}"
+            ToolTipService.ToolTip="{x:Bind h:Strings.Back}"
+            Visibility="Collapsed">
+            <Button.OpacityTransition>
+                <ScalarTransition />
+            </Button.OpacityTransition>
+            <FontIcon FontSize="16" Glyph="&#xE72B;" />
+        </Button>
 
         <!-- AdwToastOverlay: above the player bar -->
         <controls:ToastOverlay x:Name="Toasts" Grid.Row="1" />

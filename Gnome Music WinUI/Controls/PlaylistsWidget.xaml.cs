@@ -13,7 +13,8 @@ namespace Gnome_Music_WinUI.Controls;
 
 /// <summary>
 /// A playlist with its controls (widgets/playlistswidget.py + playlistcontrols.py).
-/// User playlists can be renamed inline, deleted, and reordered by drag and drop.
+/// User playlists can be renamed inline and deleted; they and Favorite Songs lose songs
+/// and are reordered by drag and drop. Recently Played is a history: none of that.
 /// </summary>
 public sealed partial class PlaylistsWidget : UserControl
 {
@@ -24,7 +25,12 @@ public sealed partial class PlaylistsWidget : UserControl
     {
         InitializeComponent();
         Unloaded += (_, _) => Watch(null);
-        Loaded += (_, _) => Watch(Playlist);
+        Loaded += (_, _) =>
+        {
+            // Songs may have been added or removed elsewhere meanwhile.
+            Watch(Playlist);
+            Update();
+        };
     }
 
     /// <summary>True while a playlist is being renamed (suppresses type-to-search and Ctrl+F).</summary>
@@ -45,10 +51,10 @@ public sealed partial class PlaylistsWidget : UserControl
         widget.Watch(e.NewValue as Playlist);
 
         var playlist = e.NewValue as Playlist;
-        bool user = playlist is UserPlaylist;
-        widget.SongsList.CanReorderItems = user;
-        widget.SongsList.CanDragItems = user;
-        widget.SongsList.AllowDrop = user;
+        bool editable = playlist?.IsEditable == true;
+        widget.SongsList.CanReorderItems = editable;
+        widget.SongsList.CanDragItems = editable;
+        widget.SongsList.AllowDrop = editable;
         widget.SongsList.ItemsSource = playlist?.Songs;
         widget.Update();
     }
@@ -91,7 +97,7 @@ public sealed partial class PlaylistsWidget : UserControl
         if (args.ItemContainer.ContentTemplateRoot is SongRow row)
         {
             row.Playlist = Playlist;
-            row.IsDraggable = Playlist is UserPlaylist;
+            row.IsDraggable = Playlist?.IsEditable == true;
         }
     }
 
@@ -115,14 +121,14 @@ public sealed partial class PlaylistsWidget : UserControl
             SongActions.PlayPlaylist(playlist, song);
     }
 
-    // Menu: Play / Delete / Rename… (Delete and Rename are disabled for smart playlists)
+    // Menu: Play / Delete / Rename… (only Play for Favorite Songs and Recently Played)
 
     private void OnMenuOpening(object? sender, object e)
     {
-        bool user = Playlist is UserPlaylist;
+        var user = Playlist is UserPlaylist ? Visibility.Visible : Visibility.Collapsed;
         PlayItem.IsEnabled = Playlist?.Count > 0;
-        DeleteItem.IsEnabled = user;
-        RenameItem.IsEnabled = user;
+        DeleteItem.Visibility = user;
+        RenameItem.Visibility = user;
     }
 
     private void OnDeleteClick(object sender, RoutedEventArgs e)
@@ -135,7 +141,7 @@ public sealed partial class PlaylistsWidget : UserControl
 
     private void OnSongRemoveRequested(object? sender, CoreSong song)
     {
-        if (Playlist is not UserPlaylist playlist || sender is not DependencyObject row)
+        if (Playlist is not { IsEditable: true } playlist || sender is not DependencyObject row)
             return;
 
         int index = IndexOfRow(row);
@@ -145,8 +151,8 @@ public sealed partial class PlaylistsWidget : UserControl
     /// <summary>The list already moved the song; store the new order.</summary>
     private void OnDragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args)
     {
-        if (Playlist is UserPlaylist playlist)
-            App.Services.Model.SyncPaths(playlist);
+        if (Playlist is { IsEditable: true } playlist)
+            App.Services.Model.SyncOrder(playlist);
     }
 
     private void OnRenameClick(object sender, RoutedEventArgs e)

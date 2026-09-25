@@ -46,6 +46,9 @@ public sealed class Player : ObservableObject, IDisposable
     private double _lastTickPosition;
     private bool _newClock;
 
+    /// <summary>The song loaded last has not played yet: once it does, it goes to the top of Recently Played.</summary>
+    private bool _newHistory;
+
     public Player(AppServices services)
     {
         _services = services;
@@ -108,6 +111,8 @@ public sealed class Player : ObservableObject, IDisposable
         _clock = services.Dispatcher.CreateTimer();
         _clock.Interval = TimeSpan.FromMilliseconds(200);
         _clock.Tick += (_, _) => OnClockTick();
+
+        services.Model.LibraryChanged += (_, _) => OnLibraryChanged();
     }
 
     /// <summary>Raised when a song could not be played.</summary>
@@ -401,6 +406,22 @@ public sealed class Player : ObservableObject, IDisposable
     // Internals
     // ------------------------------------------------------------------
 
+    /// <summary>
+    /// The song playing, or paused, left the library: its folder was taken out of the
+    /// music folders or deleted. The music stops and the queue empties, so the player
+    /// bar goes and neither Play nor the media keys start songs of it again (not in
+    /// GNOME Music).
+    /// </summary>
+    private void OnLibraryChanged()
+    {
+        if (_queue.CurrentSong is not { } song || ReferenceEquals(_services.Model.FindSong(song.FilePath), song))
+            return;
+
+        Log.Info($"The song playing left the library, playback stops: {song.FilePath}");
+        _queue.Clear();
+        Stop();
+    }
+
     private async void Load(CoreSong song)
     {
         _loadedSong = song;
@@ -409,6 +430,7 @@ public sealed class Player : ObservableObject, IDisposable
         _playedSeconds = 0;
         _lastTickPosition = 0;
         _newClock = true;
+        _newHistory = true;
         NotifyQueue();
         ApplyReplayGain(song);
 
@@ -463,6 +485,7 @@ public sealed class Player : ObservableObject, IDisposable
         _playedSeconds = 0;
         _lastTickPosition = 0;
         _newClock = true;
+        _newHistory = true;
         NotifyQueue();
         ApplyReplayGain(song);
         OnPropertyChanged(nameof(Format));
@@ -601,11 +624,17 @@ public sealed class Player : ObservableObject, IDisposable
         if (++_timelineTicks % 25 == 0)
             _controls.SetTimeline(position, Duration);
 
+        // Recently Played (the port's history): as soon as the song is heard.
+        if (_newHistory && _playedSeconds > 0 && _loadedSong is { } started)
+        {
+            _newHistory = false;
+            _services.Model.OnSongStarted(started);
+        }
+
         if (_newClock && Duration > 0 && position > 0 && _playedSeconds / Duration > 0.5 && _loadedSong is { } song)
         {
             _newClock = false;
             song.CountPlay();
-            _services.Model.OnSongPlayed(song);
         }
     }
 }

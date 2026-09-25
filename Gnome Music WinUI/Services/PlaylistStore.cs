@@ -17,24 +17,81 @@ public sealed class PlaylistData
 public sealed class PlaylistsFile
 {
     public List<PlaylistData> Playlists { get; set; } = new();
+
+    /// <summary>The favorite songs in the order the user gave them (Windows port); null until first saved.</summary>
+    public List<string>? Favorites { get; set; }
+
+    /// <summary>The songs played last, the latest first (Windows port); null until first saved.</summary>
+    public List<string>? History { get; set; }
 }
 
 /// <summary>
 /// Persistence of user playlists. GNOME Music stores them in Tracker as
 /// nmm:Playlist resources with ordered nfo:MediaFileListEntry items; here they
-/// are an ordered list of file paths in a JSON file.
+/// are an ordered list of file paths in a JSON file, with the order of the favorite
+/// songs and the history of Recently Played.
 /// </summary>
 public sealed class PlaylistStore
 {
     private readonly object _lock = new();
     private readonly List<PlaylistData> _playlists;
     private readonly DebouncedSaver _saver;
+    private List<string>? _favorites;
+    private List<string>? _history;
 
     public PlaylistStore()
     {
         var file = JsonStorage.Load(AppPaths.PlaylistsFile, AppJsonContext.Default.PlaylistsFile);
         _playlists = file?.Playlists ?? new List<PlaylistData>();
+        _favorites = file?.Favorites;
+        _history = file?.History;
         _saver = new DebouncedSaver(Save, TimeSpan.FromSeconds(1));
+    }
+
+    /// <summary>The order of the favorite songs (paths); null when none was saved yet.</summary>
+    public List<string>? Favorites
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _favorites is null ? null : new List<string>(_favorites);
+            }
+        }
+    }
+
+    /// <summary>Recently Played (paths, the latest first); null when none was saved yet.</summary>
+    public List<string>? History
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _history is null ? null : new List<string>(_history);
+            }
+        }
+    }
+
+    public void SetFavorites(IEnumerable<string> paths)
+    {
+        var list = paths.ToList();
+        lock (_lock)
+        {
+            _favorites = list;
+        }
+
+        _saver.Schedule();
+    }
+
+    public void SetHistory(IEnumerable<string> paths)
+    {
+        var list = paths.ToList();
+        lock (_lock)
+        {
+            _history = list;
+        }
+
+        _saver.Schedule();
     }
 
     public IReadOnlyList<PlaylistData> Snapshot()
@@ -118,7 +175,12 @@ public sealed class PlaylistStore
         PlaylistsFile snapshot;
         lock (_lock)
         {
-            snapshot = new PlaylistsFile { Playlists = _playlists.Select(Clone).ToList() };
+            snapshot = new PlaylistsFile
+            {
+                Playlists = _playlists.Select(Clone).ToList(),
+                Favorites = _favorites is null ? null : new List<string>(_favorites),
+                History = _history is null ? null : new List<string>(_history),
+            };
         }
 
         JsonStorage.Save(AppPaths.PlaylistsFile, snapshot, AppJsonContext.Default.PlaylistsFile);

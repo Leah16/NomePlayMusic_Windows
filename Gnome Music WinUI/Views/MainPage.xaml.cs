@@ -15,7 +15,7 @@ public enum HeaderState
     /// <summary>View switcher, search toggle and preferences.</summary>
     Main,
 
-    /// <summary>Status page: title "Music", search toggle disabled.</summary>
+    /// <summary>No music, the status page or the preferences over it: only the preferences button.</summary>
     Empty,
 
     /// <summary>Search entry instead of the view switcher.</summary>
@@ -43,7 +43,8 @@ public sealed partial class MainPage : Page
         SearchView.StateChanged += (_, state) => SearchStateChanged?.Invoke(this, state);
 
         // window.py: decide between the views and the status page after 1 s, or
-        // as soon as the library reports songs.
+        // as soon as the library reports songs; here also once the first scan found none.
+        _decided = _model.SongsAvailable || _model.IsLoaded;
         _startupTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
         _startupTimer.Interval = TimeSpan.FromMilliseconds(1000);
         _startupTimer.IsRepeating = false;
@@ -61,6 +62,9 @@ public sealed partial class MainPage : Page
     public event EventHandler<SearchState>? SearchStateChanged;
 
     public HeaderState HeaderState { get; private set; } = HeaderState.Main;
+
+    /// <summary>The status page (welcome) shows: there is no music and no other view over it.</summary>
+    public bool ShowsStatus { get; private set; }
 
     public string CurrentView => _view;
 
@@ -89,7 +93,7 @@ public sealed partial class MainPage : Page
     {
         if (e.PropertyName is nameof(CoreModel.SongsAvailable) or nameof(CoreModel.IsLoaded))
         {
-            if (_model.SongsAvailable)
+            if (_model.SongsAvailable || _model.IsLoaded)
                 _decided = true;
             Update();
         }
@@ -104,7 +108,8 @@ public sealed partial class MainPage : Page
         UpdateLoading();
         bool songs = _model.SongsAvailable;
         bool preferences = !_searchMode && _view == "preferences";
-        bool status = _decided && !songs && !_searchMode && !preferences;
+        bool empty = _decided && !songs;
+        bool status = empty && !_searchMode && !preferences;
 
         AlbumsView.Visibility = Show(!_searchMode && songs && _view == "albums");
         ArtistsView.Visibility = Show(!_searchMode && songs && _view == "artists");
@@ -119,10 +124,13 @@ public sealed partial class MainPage : Page
         if (preferences && !shown)
             PreferencesView.OnShown();
 
-        var header = _searchMode ? HeaderState.Search : status ? HeaderState.Empty : HeaderState.Main;
-        if (header != HeaderState)
+        // Without music the preferences keep the status page's header: no view switcher and
+        // no search, whose views would be empty (not in GNOME Music, which has no such view).
+        var header = _searchMode ? HeaderState.Search : empty ? HeaderState.Empty : HeaderState.Main;
+        if (header != HeaderState || status != ShowsStatus)
         {
             HeaderState = header;
+            ShowsStatus = status;
             HeaderStateChanged?.Invoke(this, header);
         }
     }

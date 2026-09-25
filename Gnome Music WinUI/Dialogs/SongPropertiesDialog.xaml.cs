@@ -26,10 +26,11 @@ namespace Gnome_Music_WinUI.Dialogs;
 /// <summary>
 /// A song's properties (not in GNOME Music), from its menu: the file, the audio
 /// stream, the play statistics and the ReplayGain on one page, all its tags with the
-/// cover on the next, read only. With the lyrics on, a third page shows the song's
-/// lyrics as the lyrics view would, sets the song as instrumental, opens its lyrics
-/// file in another app to edit it, and searches LRCLIB for lyrics to download as
-/// that file.
+/// cover on the next, read only. A third page shows the song's lyrics as the lyrics
+/// view would, sets the song as instrumental, opens its local lyrics (its lyrics file,
+/// else its cached lyrics) in another app to edit them, and searches LRCLIB for lyrics
+/// to download; it works only with the lyrics, local lyrics and downloads all on. The
+/// lyrics view's menu opens the dialog at that page.
 /// </summary>
 public sealed partial class SongPropertiesDialog : ContentDialog
 {
@@ -39,14 +40,15 @@ public sealed partial class SongPropertiesDialog : ContentDialog
     private static int _lastCategory;
 
     private readonly CoreSong _song;
-    private readonly string _lyricsFile;
+    private readonly string _songFile;
+    private readonly string _cacheFile;
     private readonly TypedEventHandler<XamlRoot, XamlRootChangedEventArgs> _rootChanged;
 
     /// <summary>The lyrics as the page shows them; null until they are looked up.</summary>
     private LyricsResult? _lyrics;
 
-    /// <summary>The song's lyrics file when the page last looked.</summary>
-    private FileStamp _fileStamp;
+    /// <summary>The song's local lyrics files when the page last looked.</summary>
+    private LyricsFiles _files;
 
     private int _lyricsLoad;
 
@@ -58,11 +60,13 @@ public sealed partial class SongPropertiesDialog : ContentDialog
     private bool _searched;
     private LrclibTrack? _selected;
 
-    public SongPropertiesDialog(CoreSong song)
+    /// <param name="showLyrics">Opens at the lyrics page (while the lyrics are on) rather than the page shown last.</param>
+    public SongPropertiesDialog(CoreSong song, bool showLyrics = false)
     {
         InitializeComponent();
         _song = song;
-        _lyricsFile = LyricsFile.PathFor(song.FilePath);
+        _songFile = LyricsFile.PathFor(song.FilePath);
+        _cacheFile = LyricsService.CachePathFor(song.FilePath);
         Title = song.Title;
 
         _rootChanged = (_, _) => FitToWindow();
@@ -84,11 +88,28 @@ public sealed partial class SongPropertiesDialog : ContentDialog
                 window.Activated -= OnWindowActivated;
         };
 
-        // Without the lyrics, no lyrics page.
-        bool lyrics = App.Services.Settings.LyricsEnabled;
-        LyricsCategory.Visibility = lyrics ? Visibility.Visible : Visibility.Collapsed;
-        Categories.SelectedIndex = lyrics || _lastCategory != LyricsIndex ? _lastCategory : 0;
+        Categories.SelectedIndex = showLyrics ? LyricsIndex : _lastCategory;
         _ = LoadAsync();
+    }
+
+    /// <summary>
+    /// The lyrics page works only with the lyrics, local lyrics and downloads all on
+    /// (the user's rule): else it says so, and nothing on it can be used.
+    /// </summary>
+    private static bool LyricsReady
+    {
+        get
+        {
+            var settings = App.Services.Settings;
+            return settings.LyricsEnabled && settings.LoadLocalLyrics && settings.DownloadLyrics;
+        }
+    }
+
+    /// <summary>To the settings that turn the lyrics page on: the dialog closes for the preferences.</summary>
+    private void OnOpenLyricsSettingsClick(object sender, RoutedEventArgs e)
+    {
+        Hide();
+        App.MainWindow?.ShowPreferences("controls");
     }
 
     private void FitToWindow()
@@ -110,9 +131,15 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         PageScroller.Visibility = index == LyricsIndex ? Visibility.Collapsed : Visibility.Visible;
         LyricsPage.Visibility = index == LyricsIndex ? Visibility.Visible : Visibility.Collapsed;
         PageScroller.ChangeView(null, 0, null, disableAnimation: true);
+        if (index != LyricsIndex)
+            return;
+
+        bool ready = LyricsReady;
+        LyricsUnavailable.Visibility = ready ? Visibility.Collapsed : Visibility.Visible;
+        LyricsMain.Visibility = ready && SearchPanel.Visibility != Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
 
         // The lyrics are looked up once the page shows.
-        if (index == LyricsIndex && _lyricsLoad == 0)
+        if (ready && _lyricsLoad == 0)
             LoadLyrics();
     }
 
@@ -259,7 +286,7 @@ public sealed partial class SongPropertiesDialog : ContentDialog
     // Lyrics: the instrumental switch, the lyrics and their source
     // ------------------------------------------------------------------
 
-    /// <summary>Looks the lyrics up as the lyrics view does, and the song's lyrics file.</summary>
+    /// <summary>Looks the lyrics up as the lyrics view does, and the song's local lyrics files.</summary>
     private async void LoadLyrics()
     {
         int id = ++_lyricsLoad;
@@ -274,7 +301,6 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         LyricsRing.Visibility = Visibility.Visible;
         LyricsRing.IsActive = true;
 
-        var stamp = Task.Run(() => LyricsFile.Stamp(_lyricsFile));
         LyricsResult result;
         try
         {
@@ -286,26 +312,27 @@ public sealed partial class SongPropertiesDialog : ContentDialog
             result = new LyricsResult(LyricsStatus.Failed, LyricsSource.Lrclib);
         }
 
-        var file = await stamp;
+        // Looked at after the lookup, which may have just downloaded them.
+        var files = await Task.Run(() => LyricsService.Stamp(_song));
         if (id != _lyricsLoad)
             return;
 
         _lyrics = result;
-        _fileStamp = file;
+        _files = files;
         ShowLyrics(result);
     }
 
     private void ShowLyrics(LyricsResult result)
     {
         bool instrumental = _song.Instrumental;
-        string fileName = Path.GetFileName(_lyricsFile);
+        string fileName = Path.GetFileName(_songFile);
         LyricsRing.IsActive = false;
         LyricsRing.Visibility = Visibility.Collapsed;
 
-        // Editing needs the lyrics in their file; neither applies to an instrumental.
-        EditButton.IsEnabled = _fileStamp.Exists && !instrumental;
+        // Editing needs the lyrics saved locally; neither applies to an instrumental.
+        EditButton.IsEnabled = _files.Any && !instrumental;
         SearchButton.IsEnabled = !instrumental;
-        bool needsFile = !_fileStamp.Exists && !instrumental;
+        bool needsFile = !_files.Any && !instrumental;
         EditButtonHint.Visibility = needsFile ? Visibility.Visible : Visibility.Collapsed;
         AutomationProperties.SetHelpText(EditButton, needsFile ? Strings.EditLyricsUnavailable : "");
 
@@ -313,6 +340,7 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         string? source = result switch
         {
             { Source: LyricsSource.File } => Strings.LyricsFromFile(fileName),
+            { Source: LyricsSource.Cache } => Strings.LyricsFromCache,
             { Source: LyricsSource.Lrclib, Status: LyricsStatus.Found, Track: { } track } => Strings.LyricsFromLrclib(TrackName(track)),
             { Source: LyricsSource.Lrclib, Status: LyricsStatus.Instrumental } => Strings.LyricsLrclibInstrumental,
             _ => null,
@@ -320,8 +348,13 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         if (source is not null && result.Lyrics is { IsSynced: false })
             source += " · " + Strings.LyricsNotSynced;
         AddInfo(source);
-        if (!instrumental && _fileStamp.Exists && !App.Services.Settings.LoadLocalLyrics)
-            AddInfo(Strings.LyricsFileNotLoaded(fileName));
+        if (!instrumental && !App.Services.Settings.LoadLocalLyrics)
+        {
+            if (_files.Song.Exists)
+                AddInfo(Strings.LyricsFileNotLoaded(fileName));
+            else if (_files.Cache.Exists)
+                AddInfo(Strings.LyricsCacheNotLoaded);
+        }
 
         LyricsText.Inlines.Clear();
         LyricsMessage.Visibility = Visibility.Collapsed;
@@ -382,19 +415,19 @@ public sealed partial class SongPropertiesDialog : ContentDialog
             LoadLyrics();
     }
 
-    /// <summary>Back from another app, maybe the editor: a lyrics file that changed, came or went shows.</summary>
+    /// <summary>Back from another app, maybe the editor: a lyrics file (or cached lyrics) that changed, came or went shows.</summary>
     private async void OnWindowActivated(object sender, WindowActivatedEventArgs e)
     {
         if (e.WindowActivationState == WindowActivationState.Deactivated || _lyricsLoad == 0)
             return;
 
-        var now = await Task.Run(() => LyricsFile.Stamp(_lyricsFile));
-        if (now == _fileStamp)
+        var now = await Task.Run(() => LyricsService.Stamp(_song));
+        if (now == _files)
             return;
 
         if (SearchPanel.Visibility == Visibility.Visible)
         {
-            _fileStamp = now;
+            _files = now;
             _lyricsStale = true;
             UpdateDownloadButton();
         }
@@ -409,24 +442,26 @@ public sealed partial class SongPropertiesDialog : ContentDialog
     private void OnEditWithClick(object sender, RoutedEventArgs e) => OpenLyricsFile(chooseApp: true);
 
     /// <summary>
-    /// Opens the lyrics file in another app to edit it: the one Windows opens .lrc files
-    /// with (Windows asks which when there is none), or one the user picks. The page
-    /// shows the changes once the user comes back to the window.
+    /// Opens the local lyrics in another app to edit them (the lyrics file, else the
+    /// cached one: the one they are read from): the app Windows opens .lrc files with
+    /// (Windows asks which when there is none), or one the user picks. The page shows the
+    /// changes once the user comes back to the window.
     /// </summary>
     private void OpenLyricsFile(bool chooseApp)
     {
+        string file = _files.Song.Exists ? _songFile : _cacheFile;
         try
         {
             var start = chooseApp
-                ? new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "OpenWith.exe"), $"\"{_lyricsFile}\"")
-                : new ProcessStartInfo(_lyricsFile) { UseShellExecute = true };
+                ? new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "OpenWith.exe"), $"\"{file}\"")
+                : new ProcessStartInfo(file) { UseShellExecute = true };
             if (!chooseApp && start.Verbs.Contains("edit", StringComparer.OrdinalIgnoreCase))
                 start.Verb = "edit";
             Process.Start(start);
         }
         catch (Exception ex)
         {
-            Log.Warning($"Cannot open {_lyricsFile}: {ex.Message}");
+            Log.Warning($"Cannot open {file}: {ex.Message}");
             LyricsInfo.Children.Clear();
             AddInfo(Strings.LyricsOpenFailed(ex.Message));
         }
@@ -611,11 +646,17 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         UpdateDownloadButton();
     }
 
-    /// <summary>Only lyrics can be downloaded; over a lyrics file, the button says it replaces it.</summary>
+    /// <summary>
+    /// Only lyrics can be downloaded. Over local lyrics the button says it replaces them,
+    /// else where they go (Preferences: the song's folder or the lyrics cache).
+    /// </summary>
     private void UpdateDownloadButton()
     {
+        var (file, exists) = App.Services.Lyrics.SaveTarget(_song, _files);
         DownloadButton.IsEnabled = _selected is { HasLyrics: true };
-        DownloadText.Text = _fileStamp.Exists ? Strings.ReplaceLocalLyrics : Strings.DownloadToLocal;
+        DownloadText.Text = exists ? Strings.ReplaceLocalLyrics
+            : file == _cacheFile ? Strings.DownloadToCache
+            : Strings.DownloadToLocal;
     }
 
     private void OnResultsAreaSizeChanged(object sender, SizeChangedEventArgs e)
@@ -632,17 +673,18 @@ public sealed partial class SongPropertiesDialog : ContentDialog
     }
 
     /// <summary>
-    /// Saves the selected lyrics as the song's lyrics file. A file that is there, maybe
-    /// the user's own, is only replaced once confirmed.
+    /// Saves the selected lyrics as the song's local lyrics (see <see cref="LyricsService.SaveTarget"/>).
+    /// A file that is there, maybe the user's own, is only replaced once confirmed.
     /// </summary>
     private void OnDownloadClick(object sender, RoutedEventArgs e)
     {
         if (_selected is not { HasLyrics: true } track)
             return;
 
-        if (!_fileStamp.Exists)
+        var (file, exists) = App.Services.Lyrics.SaveTarget(_song, _files);
+        if (!exists)
         {
-            _ = SaveLyricsAsync(track);
+            _ = SaveLyricsAsync(track, file);
             return;
         }
 
@@ -650,7 +692,7 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         var confirm = new StackPanel { Spacing = 12, MaxWidth = 300 };
         confirm.Children.Add(new TextBlock
         {
-            Text = Strings.ReplaceLyricsConfirm(Path.GetFileName(_lyricsFile)),
+            Text = file == _cacheFile ? Strings.ReplaceCachedLyricsConfirm : Strings.ReplaceLyricsConfirm(Path.GetFileName(file)),
             TextWrapping = TextWrapping.Wrap,
         });
         confirm.Children.Add(replace);
@@ -658,25 +700,25 @@ public sealed partial class SongPropertiesDialog : ContentDialog
         replace.Click += (_, _) =>
         {
             flyout.Hide();
-            _ = SaveLyricsAsync(track);
+            _ = SaveLyricsAsync(track, file);
         };
         flyout.ShowAt(DownloadButton);
     }
 
     /// <summary>Back at the lyrics once saved: they show the file, or say why they do not.</summary>
-    private async Task SaveLyricsAsync(LrclibTrack track)
+    private async Task SaveLyricsAsync(LrclibTrack track, string file)
     {
         DownloadButton.IsEnabled = false;
         DownloadStatus.Text = "";
         try
         {
-            await App.Services.Lyrics.SaveAsync(_song, track);
+            await App.Services.Lyrics.SaveAsync(_song, track, file);
             _lyricsStale = true;
             CloseSearch();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            Log.Warning($"Cannot save the lyrics as {_lyricsFile}: {ex.Message}");
+            Log.Warning($"Cannot save the lyrics as {file}: {ex.Message}");
             DownloadStatus.Text = Strings.LyricsSaveFailed(ex.Message);
             UpdateDownloadButton();
         }

@@ -172,6 +172,9 @@ public sealed class CoreSong : ObservableObject
         OnPropertyChanged(nameof(LastPlayed));
     }
 
+    /// <summary>The play counts were cleared (Preferences → Reset).</summary>
+    internal void OnPlayCountCleared() => OnPropertyChanged(nameof(PlayCount));
+
     /// <summary>Updates the metadata after a rescan (CoreSong.update()).</summary>
     internal bool UpdateRecord(SongRecord record)
     {

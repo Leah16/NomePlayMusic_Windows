@@ -85,6 +85,38 @@
             Margin="0,0,14,0"
             Visibility="Collapsed">
 
+            <!-- Without the lyrics, local lyrics and downloads all on, nothing here works:
+                 what to turn on, and the way there -->
+            <StackPanel
+                x:Name="LyricsUnavailable"
+                MaxWidth="420"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12"
+                Visibility="Collapsed">
+                <FontIcon
+                    FontSize="32"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Glyph="&#xE90B;" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    HorizontalTextAlignment="Center"
+                    Style="{StaticResource StrongLabelStyle}"
+                    Text="{x:Bind h:Strings.LyricsSettingsRequired}"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    HorizontalTextAlignment="Center"
+                    Style="{StaticResource SecondaryLabelStyle}"
+                    Text="{x:Bind h:Strings.LyricsSettingsRequiredDetail}"
+                    TextWrapping="Wrap" />
+                <Button
+                    HorizontalAlignment="Center"
+                    Click="OnOpenLyricsSettingsClick"
+                    Content="{x:Bind h:Strings.OpenPreferences}"
+                    Style="{StaticResource AccentButtonStyle}" />
+            </StackPanel>
+
             <!-- The song's lyrics, where they come from, and what can be done with them -->
             <Grid x:Name="LyricsMain" RowSpacing="8">
                 <Grid.RowDefinitions>

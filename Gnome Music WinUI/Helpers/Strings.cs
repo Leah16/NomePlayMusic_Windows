@@ -84,6 +84,7 @@ public static class Strings
     public static string Lyrics => Get("Lyrics");
     public static string ShowLyrics => Get("ShowLyrics");
     public static string HideLyrics => Get("HideLyrics");
+    public static string ManageLyrics => Get("ManageLyrics");
     public static string LyricsLoading => Get("LyricsLoading");
     public static string LyricsNotFound => Get("LyricsNotFound");
     public static string LyricsNotSynced => Get("LyricsNotSynced");
@@ -112,6 +113,7 @@ public static class Strings
     // Playlists
     public static string MenuDelete => Get("MenuDelete");
     public static string MenuRename => Get("MenuRename");
+    public static string Rename => Get("Rename");
     public static string PlaylistName => Get("PlaylistName");
     public static string Done => Get("Done");
     public static string AddToPlaylist => Get("AddToPlaylist");
@@ -123,12 +125,8 @@ public static class Strings
     public static string PlaylistRemoved(string title) => Format("PlaylistRemoved", title);
     public static string SongRemovedFrom(string song, string playlist) => Format("SongRemovedFrom", song, playlist);
     public static string Undo => Get("Undo");
-    public static string MostPlayed => Get("MostPlayed");
-    public static string NeverPlayed => Get("NeverPlayed");
     public static string RecentlyPlayed => Get("RecentlyPlayed");
-    public static string RecentlyAdded => Get("RecentlyAdded");
     public static string StarredSongs => Get("StarredSongs");
-    public static string InsufficientlyTagged => Get("InsufficientlyTagged");
     public static string AllSongs => Get("AllSongs");
 
     // Status pages
@@ -155,15 +153,12 @@ public static class Strings
     public static string RepeatModeSong => Get("RepeatModeSong");
     public static string RepeatModeAll => Get("RepeatModeAll");
     public static string ReplayGain => Get("ReplayGain");
-    public static string ReplayGainDescription => Get("ReplayGainDescription");
     public static string ReplayGainDisabled => Get("ReplayGainDisabled");
     public static string ReplayGainAlbum => Get("ReplayGainAlbum");
     public static string ReplayGainTrack => Get("ReplayGainTrack");
     public static string PowerSettings => Get("PowerSettings");
     public static string InhibitSuspend => Get("InhibitSuspend");
-    public static string OnlyWhilePlaying => Get("OnlyWhilePlaying");
     public static string MusicFolders => Get("MusicFolders");
-    public static string MusicFoldersDescription => Get("MusicFoldersDescription");
     public static string AddFolder => Get("AddFolder");
     public static string RemoveFolder => Get("RemoveFolder");
     public static string Close => Get("Close");
@@ -209,18 +204,14 @@ public static class Strings
     public static string PrefsPlayback => Get("PrefsPlayback");
     public static string PrefsOutput => Get("PrefsOutput");
     public static string PrefsControls => Get("PrefsControls");
+    public static string PrefsReset => Get("PrefsReset");
     public static string ChannelProcessing => Get("ChannelProcessing");
     public static string PhaseInvert => Get("PhaseInvert");
-    public static string PhaseInvertDescription => Get("PhaseInvertDescription");
     public static string MonoOutput => Get("MonoOutput");
-    public static string MonoOutputDescription => Get("MonoOutputDescription");
     public static string SwapChannels => Get("SwapChannels");
-    public static string SwapChannelsDescription => Get("SwapChannelsDescription");
     public static string OutputDevice => Get("OutputDevice");
     public static string AudioInterface => Get("AudioInterface");
-    public static string AudioInterfaceDescription => Get("AudioInterfaceDescription");
     public static string ExclusiveMode => Get("ExclusiveMode");
-    public static string ExclusiveModeDescription => Get("ExclusiveModeDescription");
     public static string Device => Get("Device");
     public static string DefaultDevice => Get("DefaultDevice");
     public static string NoAsioDriver => Get("NoAsioDriver");
@@ -231,8 +222,6 @@ public static class Strings
     public static string ChannelCounts => Get("ChannelCounts");
     public static string Checking => Get("Checking");
     public static string NotSupported => Get("NotSupported");
-    public static string MixerFormat(string rate, string channels) => Format("MixerFormat", rate, channels);
-    public static string ExclusiveUnsupported => Get("ExclusiveUnsupported");
     public static string DopSuffix => Get("DopSuffix");
     public static string NativeSuffix => Get("NativeSuffix");
     public static string MonoChannel => Get("MonoChannel");
@@ -243,29 +232,27 @@ public static class Strings
     public static string DsdConvert => Get("DsdConvert");
     public static string DsdDop => Get("DsdDop");
     public static string DsdNative => Get("DsdNative");
-    public static string DsdConvertDescription => Get("DsdConvertDescription");
-    public static string DsdDopDescription => Get("DsdDopDescription");
-    public static string DsdNativeDescription => Get("DsdNativeDescription");
-    public static string DsdBitstreamNote => Get("DsdBitstreamNote");
     public static string DsdNotPossible => Get("DsdNotPossible");
     public static string DsdGain => Get("DsdGain");
-    public static string DsdGainDescription => Get("DsdGainDescription");
     public static string Features => Get("Features");
     public static string FeatureMiniPlayer => Get("FeatureMiniPlayer");
-    public static string FeatureMiniPlayerDescription => Get("FeatureMiniPlayerDescription");
+    public static string MiniPlayerMode => Get("MiniPlayerMode");
+    public static string MiniPlayerModeCover => Get("MiniPlayerModeCover");
+    public static string MiniPlayerModeControls => Get("MiniPlayerModeControls");
+    public static string MiniPlayerModeLyrics => Get("MiniPlayerModeLyrics");
+    public static string MiniPlayerLyricsNote => Get("MiniPlayerLyricsNote");
     public static string FeatureOutputButton => Get("FeatureOutputButton");
-    public static string FeatureOutputButtonDescription => Get("FeatureOutputButtonDescription");
     public static string FeatureVolume => Get("FeatureVolume");
-    public static string FeatureVolumeDescription => Get("FeatureVolumeDescription");
+    public static string VolumeControlNote => Get("VolumeControlNote");
     public static string FeatureLyrics => Get("FeatureLyrics");
-    public static string FeatureLyricsDescription => Get("FeatureLyricsDescription");
     public static string LoadLocalLyrics => Get("LoadLocalLyrics");
-    public static string LoadLocalLyricsDescription => Get("LoadLocalLyricsDescription");
     public static string DownloadLyrics => Get("DownloadLyrics");
-    public static string DownloadLyricsDescription => Get("DownloadLyricsDescription");
+    public static string LyricsLocation => Get("LyricsLocation");
+    public static string LyricsLocationSongFolder => Get("LyricsLocationSongFolder");
+    public static string LyricsLocationCache => Get("LyricsLocationCache");
+    public static string RememberMissingLyrics => Get("RememberMissingLyrics");
     public static string Display => Get("Display");
     public static string ShowAudioFormat => Get("ShowAudioFormat");
-    public static string ShowAudioFormatDescription => Get("ShowAudioFormatDescription");
     public static string OutputFallback => Get("OutputFallback");
     public static string NoPlaybackDevice => Get("NoPlaybackDevice");
 
@@ -317,14 +304,19 @@ public static class Strings
     // Song properties: lyrics (Windows port)
     public static string SetInstrumental => Get("SetInstrumental");
     public static string SetInstrumentalDescription => Get("SetInstrumentalDescription");
+    public static string LyricsSettingsRequired => Get("LyricsSettingsRequired");
+    public static string LyricsSettingsRequiredDetail => Get("LyricsSettingsRequiredDetail");
+    public static string OpenPreferences => Get("OpenPreferences");
     public static string EditLyrics => Get("EditLyrics");
     public static string EditLyricsWith => Get("EditLyricsWith");
     public static string EditLyricsUnavailable => Get("EditLyricsUnavailable");
     public static string SearchLyricsOnline => Get("SearchLyricsOnline");
     public static string LyricsFromFile(string file) => Format("LyricsFromFile", file);
+    public static string LyricsFromCache => Get("LyricsFromCache");
     public static string LyricsFromLrclib(string track) => Format("LyricsFromLrclib", track);
     public static string LyricsLrclibInstrumental => Get("LyricsLrclibInstrumental");
     public static string LyricsFileNotLoaded(string file) => Format("LyricsFileNotLoaded", file);
+    public static string LyricsCacheNotLoaded => Get("LyricsCacheNotLoaded");
     public static string LyricsFailed => Get("LyricsFailed");
     public static string LyricsOpenFailed(string error) => Format("LyricsOpenFailed", error);
     public static string Retry => Get("Retry");
@@ -338,8 +330,25 @@ public static class Strings
     public static string ResultNotSynced => Get("ResultNotSynced");
     public static string ResultInUse => Get("ResultInUse");
     public static string DownloadToLocal => Get("DownloadToLocal");
+    public static string DownloadToCache => Get("DownloadToCache");
     public static string ReplaceLocalLyrics => Get("ReplaceLocalLyrics");
     public static string ReplaceLyricsConfirm(string file) => Format("ReplaceLyricsConfirm", file);
+    public static string ReplaceCachedLyricsConfirm => Get("ReplaceCachedLyricsConfirm");
     public static string Replace => Get("Replace");
     public static string LyricsSaveFailed(string error) => Format("LyricsSaveFailed", error);
+
+    // Preferences → Reset (Windows port)
+    public static string ClearLyricsCache => Get("ClearLyricsCache");
+    public static string LyricsCacheSize(int files, string size) => Format("LyricsCacheSize", files, size);
+    public static string LyricsCacheEmpty => Get("LyricsCacheEmpty");
+    public static string ClearLyricsCacheConfirm => Get("ClearLyricsCacheConfirm");
+    public static string LyricsCacheCleared(int files) => Format("LyricsCacheCleared", files);
+    public static string ClearPlayCounts => Get("ClearPlayCounts");
+    public static string ClearPlayCountsConfirm => Get("ClearPlayCountsConfirm");
+    public static string PlayCountsCleared => Get("PlayCountsCleared");
+    public static string ResetSettings => Get("ResetSettings");
+    public static string ResetSettingsConfirm => Get("ResetSettingsConfirm");
+    public static string SettingsReset => Get("SettingsReset");
+    public static string Clear => Get("Clear");
+    public static string ResetAction => Get("ResetAction");
 }

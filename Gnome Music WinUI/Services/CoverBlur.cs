@@ -11,7 +11,8 @@ namespace Gnome_Music_WinUI.Services;
 /// A tiny, heavily blurred copy of a cover for a background (the mini player): the
 /// picture scaled down to 32 × 32 and box-blurred three times each way, which comes
 /// close to a Gaussian blur. Stretched over a window it becomes a soft field of the
-/// cover's colors.
+/// cover's colors. <see cref="Blur"/> does the same to any small picture (the mini
+/// player's lyrics).
 /// </summary>
 public static class CoverBlur
 {
@@ -37,15 +38,7 @@ public static class CoverBlur
                 transform,
                 ExifOrientationMode.RespectExifOrientation,
                 ColorManagementMode.ColorManageToSRgb);
-            byte[] pixels = data.DetachPixelData();
-            for (int pass = 0; pass < 3; pass++)
-            {
-                BoxBlur(pixels, horizontal: true);
-                BoxBlur(pixels, horizontal: false);
-            }
-
-            return (SoftwareBitmap?)SoftwareBitmap.CreateCopyFromBuffer(
-                pixels.AsBuffer(), BitmapPixelFormat.Bgra8, Size, Size, BitmapAlphaMode.Premultiplied);
+            return (SoftwareBitmap?)Blur(data.DetachPixelData(), Size, Size, Radius);
         }
         catch (Exception ex)
         {
@@ -54,27 +47,45 @@ public static class CoverBlur
         }
     });
 
-    /// <summary>Averages each pixel with its neighbours along the rows or the columns; the edges repeat.</summary>
-    private static void BoxBlur(byte[] pixels, bool horizontal)
+    /// <summary>
+    /// Blurs a picture (BGRA, premultiplied; the pixels change) by
+    /// <paramref name="radius"/> pixels, three times each way.
+    /// </summary>
+    public static SoftwareBitmap Blur(byte[] pixels, int width, int height, int radius)
     {
-        var line = new byte[Size * 4];
-        for (int i = 0; i < Size; i++)
+        for (int pass = 0; pass < 3; pass++)
         {
-            for (int j = 0; j < Size; j++)
+            BoxBlur(pixels, width, height, radius, horizontal: true);
+            BoxBlur(pixels, width, height, radius, horizontal: false);
+        }
+
+        return SoftwareBitmap.CreateCopyFromBuffer(
+            pixels.AsBuffer(), BitmapPixelFormat.Bgra8, width, height, BitmapAlphaMode.Premultiplied);
+    }
+
+    /// <summary>Averages each pixel with its neighbours along the rows or the columns; the edges repeat.</summary>
+    private static void BoxBlur(byte[] pixels, int width, int height, int radius, bool horizontal)
+    {
+        int count = horizontal ? height : width;
+        int length = horizontal ? width : height;
+        var line = new byte[length * 4];
+        for (int i = 0; i < count; i++)
+        {
+            for (int j = 0; j < length; j++)
                 Array.Copy(pixels, Offset(i, j), line, j * 4, 4);
 
-            for (int j = 0; j < Size; j++)
+            for (int j = 0; j < length; j++)
             {
                 for (int channel = 0; channel < 4; channel++)
                 {
                     int sum = 0;
-                    for (int k = -Radius; k <= Radius; k++)
-                        sum += line[Math.Clamp(j + k, 0, Size - 1) * 4 + channel];
-                    pixels[Offset(i, j) + channel] = (byte)(sum / (2 * Radius + 1));
+                    for (int k = -radius; k <= radius; k++)
+                        sum += line[Math.Clamp(j + k, 0, length - 1) * 4 + channel];
+                    pixels[Offset(i, j) + channel] = (byte)(sum / (2 * radius + 1));
                 }
             }
         }
 
-        int Offset(int row, int position) => (horizontal ? row * Size + position : position * Size + row) * 4;
+        int Offset(int row, int position) => (horizontal ? row * width + position : position * width + row) * 4;
     }
 }

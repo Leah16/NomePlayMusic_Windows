@@ -10,91 +10,137 @@ namespace Gnome_Music_WinUI.Services;
 
 public sealed partial class CoreModel
 {
-    private const int SmartPlaylistLimit = 50;
+    /// <summary>Recently Played keeps this many songs.</summary>
+    private const int HistoryLimit = 100;
 
-    private readonly List<SmartPlaylist> _smartPlaylists = new();
     private readonly Dictionary<string, List<string>> _playlistPaths = new();
-    private bool _smartRefreshQueued;
+    private FavoritesPlaylist _favorites = null!;
+    private HistoryPlaylist _history = null!;
+
+    /// <summary>The order of the favorite songs, those missing from the library included.</summary>
+    private List<string> _favoritePaths = new();
+
+    /// <summary>Recently Played, the latest first, songs missing from the library included.</summary>
+    private List<string> _historyPaths = new();
 
     /// <summary>
-    /// playlists_sort: smart playlists first (natural order of their titles), then
-    /// user playlists, newest first. Playlists staged for deletion are left out.
+    /// The sidebar's playlists: Favorite Songs and Recently Played (the port keeps these
+    /// two of GNOME Music's smart playlists), then the user's playlists, newest first.
+    /// Playlists staged for deletion are left out.
     /// </summary>
     public ObservableCollection<Playlist> Playlists { get; } = new();
 
-    public IReadOnlyList<SmartPlaylist> SmartPlaylists => _smartPlaylists;
+    public FavoritesPlaylist Favorites => _favorites;
 
-    /// <summary>user_playlists_sort: what the Add to Playlist dialog lists.</summary>
+    public HistoryPlaylist History => _history;
+
+    /// <summary>user_playlists_sort.</summary>
     public IEnumerable<UserPlaylist> UserPlaylists => Playlists.OfType<UserPlaylist>();
 
+    /// <summary>What songs can be added to (the Add to Playlist dialog): Favorite Songs and the user's playlists.</summary>
+    public IEnumerable<Playlist> EditablePlaylists => Playlists.Where(p => p.IsEditable);
+
     // ------------------------------------------------------------------
-    // Smart playlists (grilowrappers/smartplaylist.py)
+    // Favorite Songs and Recently Played
     // ------------------------------------------------------------------
 
-    private void CreateSmartPlaylists()
+    private void CreateSystemPlaylists()
     {
-        // "Recently" = 7 days before UTC midnight, computed once at start-up.
-        var now = DateTime.UtcNow;
-        var compareDate = now.AddDays(-7).Date;
-
-        _smartPlaylists.Add(new SmartPlaylist("MOST_PLAYED", Strings.MostPlayed, SmartPlaylist.Glyphs.MostPlayed, songs => songs
-            .Where(s => s.PlayCount > 0)
-            .OrderByDescending(s => s.PlayCount)
-            .Take(SmartPlaylistLimit)));
-
-        _smartPlaylists.Add(new SmartPlaylist("NEVER_PLAYED", Strings.NeverPlayed, SmartPlaylist.Glyphs.NeverPlayed, songs => songs
-            .Where(s => s.PlayCount == 0)
-            .Take(SmartPlaylistLimit)));
-
-        _smartPlaylists.Add(new SmartPlaylist("RECENTLY_PLAYED", Strings.RecentlyPlayed, SmartPlaylist.Glyphs.RecentlyPlayed, songs => songs
-            .Where(s => s.PlayCount > 0 && s.LastPlayed is not null)
-            .OrderByDescending(s => s.LastPlayed)
-            .Take(SmartPlaylistLimit)
-            .Where(s => s.LastPlayed > compareDate)));
-
-        _smartPlaylists.Add(new SmartPlaylist("RECENTLY_ADDED", Strings.RecentlyAdded, SmartPlaylist.Glyphs.RecentlyAdded, songs => songs
-            .Where(s => s.Added > compareDate)
-            .OrderByDescending(s => s.Added)
-            .Take(SmartPlaylistLimit)));
-
-        _smartPlaylists.Add(new SmartPlaylist("FAVORITES", Strings.StarredSongs, SmartPlaylist.Glyphs.Favorites, songs => songs
-            .Where(s => s.Favorite)
-            .OrderByDescending(s => s.Added)));
-
-        _smartPlaylists.Add(new SmartPlaylist("INSUFFICIENT_TAGGED", Strings.InsufficientlyTagged, SmartPlaylist.Glyphs.InsufficientTagged, songs => songs
-            .Where(s => !s.HasAlbum || !s.HasArtist)));
-
-        foreach (var playlist in _smartPlaylists.OrderBy(p => NaturalKey.Create(p.Title)))
-            Playlists.Add(playlist);
+        _favorites = new FavoritesPlaylist(Strings.StarredSongs);
+        _history = new HistoryPlaylist(Strings.RecentlyPlayed);
+        Playlists.Add(_favorites);
+        Playlists.Add(_history);
     }
-
-    /// <summary>Re-runs the query of every smart playlist.</summary>
-    public void RefreshSmartPlaylists()
-    {
-        _smartRefreshQueued = false;
-        foreach (var playlist in _smartPlaylists)
-            playlist.Refresh(_songs);
-    }
-
-    /// <summary>Re-runs one smart playlist (done whenever it is opened in the playlists view).</summary>
-    public void RefreshSmartPlaylist(SmartPlaylist playlist) => playlist.Refresh(_songs);
 
     /// <summary>
-    /// [PORT] GNOME Music only refreshes a smart playlist when it is opened; the
-    /// port also refreshes them after favorites and play counts change.
+    /// Their saved order and history. The first time, what GNOME Music's smart playlists
+    /// showed: the starred songs, the latest added first, and the songs played by their
+    /// last play; both are saved then.
     /// </summary>
-    private void QueueSmartPlaylistRefresh()
+    private void LoadSystemPlaylists()
     {
-        if (_smartRefreshQueued)
-            return;
+        var store = _services.PlaylistStore;
+        if (store.Favorites is { } favorites)
+            _favoritePaths = favorites;
+        else
+            store.SetFavorites(_favoritePaths = _services.UserData.FavoritePaths());
 
-        _smartRefreshQueued = true;
-        _services.Dispatcher.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, RefreshSmartPlaylists);
+        if (store.History is { } history)
+            _historyPaths = history;
+        else
+            store.SetHistory(_historyPaths = _services.UserData.PlayedPaths(HistoryLimit));
+
+        ResolveSystemPlaylists();
     }
 
-    internal void OnSongFavoriteChanged(CoreSong song) => QueueSmartPlaylistRefresh();
+    /// <summary>Maps their paths to library songs again; Favorite Songs also takes the starred songs its order misses.</summary>
+    private void ResolveSystemPlaylists()
+    {
+        var favorites = new List<CoreSong>();
+        var seen = new HashSet<CoreSong>();
+        foreach (var path in _favoritePaths)
+        {
+            if (FindSong(path) is { Favorite: true } song && seen.Add(song))
+                favorites.Add(song);
+        }
 
-    internal void OnSongPlayed(CoreSong song) => QueueSmartPlaylistRefresh();
+        favorites.AddRange(_songs.Where(s => s.Favorite && !seen.Contains(s)));
+        _favorites.SetSongs(favorites);
+        _history.SetSongs(Resolve(_historyPaths).Distinct().ToList());
+    }
+
+    /// <summary>A song was starred or unstarred: it goes to the top of Favorite Songs, or out of it.</summary>
+    internal void OnSongFavoriteChanged(CoreSong song)
+    {
+        _favoritePaths.RemoveAll(p => SamePath(p, song.FilePath));
+        if (song.Favorite)
+            _favoritePaths.Insert(0, song.FilePath);
+        _services.PlaylistStore.SetFavorites(_favoritePaths);
+
+        int index = _favorites.Songs.IndexOf(song);
+        if (song.Favorite && index < 0)
+            _favorites.Songs.Insert(0, song);
+        else if (!song.Favorite && index >= 0)
+            _favorites.Songs.RemoveAt(index);
+    }
+
+    /// <summary>A song started playing (Player): it goes to the top of Recently Played.</summary>
+    internal void OnSongStarted(CoreSong song)
+    {
+        _historyPaths.RemoveAll(p => SamePath(p, song.FilePath));
+        _historyPaths.Insert(0, song.FilePath);
+        if (_historyPaths.Count > HistoryLimit)
+            _historyPaths.RemoveRange(HistoryLimit, _historyPaths.Count - HistoryLimit);
+        _services.PlaylistStore.SetHistory(_historyPaths);
+
+        int index = _history.Songs.IndexOf(song);
+        if (index > 0)
+        {
+            _history.Songs.Move(index, 0);
+        }
+        else if (index < 0)
+        {
+            _history.Songs.Insert(0, song);
+            while (_history.Songs.Count > HistoryLimit)
+                _history.Songs.RemoveAt(_history.Songs.Count - 1);
+        }
+    }
+
+    /// <summary>
+    /// Every song's play count back to 0 (Preferences → Reset, not in GNOME Music).
+    /// Favorites, last played dates and Recently Played stay. Returns how many songs had
+    /// plays.
+    /// </summary>
+    public int ClearPlayCounts()
+    {
+        int cleared = _services.UserData.ClearPlayCounts();
+        foreach (var song in _songs)
+            song.OnPlayCountCleared();
+        Log.Info($"Cleared the play counts of {cleared} songs");
+        return cleared;
+    }
+
+    private static bool SamePath(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 
     // ------------------------------------------------------------------
     // User playlists
@@ -111,10 +157,10 @@ public sealed partial class CoreModel
         }
     }
 
-    /// <summary>Inserts a user playlist after the smart ones, newest first.</summary>
+    /// <summary>Inserts a user playlist after the app's, newest first.</summary>
     private void InsertSorted(UserPlaylist playlist)
     {
-        int index = _smartPlaylists.Count(p => Playlists.Contains(p));
+        int index = Playlists.Count(p => p.IsSystem);
         while (index < Playlists.Count
             && Playlists[index] is UserPlaylist other
             && other.CreationDate >= playlist.CreationDate)
@@ -142,7 +188,7 @@ public sealed partial class CoreModel
     public UserPlaylist CreatePlaylist(string title, IEnumerable<CoreSong>? songs = null)
     {
         var list = songs?.ToList() ?? new List<CoreSong>();
-        var data = _services.PlaylistStore.Create(title, list.Select(s => s.FilePath));
+        var data = _services.PlaylistStore.Create(title.Trim(), list.Select(s => s.FilePath));
         var playlist = new UserPlaylist(data.Id, data.Title, new DateTime(data.Created, DateTimeKind.Utc));
         _playlistPaths[data.Id] = data.Songs;
         playlist.SetSongs(list);
@@ -181,40 +227,94 @@ public sealed partial class CoreModel
         _playlistPaths.Remove(playlist.Id);
     }
 
-    /// <summary>Appends songs (duplicates allowed), like Playlist.add_songs().</summary>
-    public void AddToPlaylist(UserPlaylist playlist, IEnumerable<CoreSong> songs)
+    // ------------------------------------------------------------------
+    // Songs of a playlist: user playlists and Favorite Songs
+    // ------------------------------------------------------------------
+
+    /// <summary>
+    /// Appends songs to a user playlist (duplicates allowed, like Playlist.add_songs());
+    /// Favorite Songs stars them. Recently Played takes none.
+    /// </summary>
+    public void AddToPlaylist(Playlist playlist, IEnumerable<CoreSong> songs)
     {
-        var paths = GetPaths(playlist);
+        if (playlist is FavoritesPlaylist)
+        {
+            foreach (var song in songs)
+                song.Favorite = true;
+            return;
+        }
+
+        if (playlist is not UserPlaylist user)
+            return;
+
+        var paths = GetPaths(user);
         foreach (var song in songs)
         {
             paths.Add(song.FilePath);
-            playlist.Songs.Add(song);
+            user.Songs.Add(song);
         }
 
-        _services.PlaylistStore.SetSongs(playlist.Id, paths);
+        _services.PlaylistStore.SetSongs(user.Id, paths);
     }
 
-    public void RemoveFromPlaylist(UserPlaylist playlist, int index)
+    /// <summary>Takes a song out of a playlist; out of Favorite Songs, it is unstarred.</summary>
+    public void RemoveFromPlaylist(Playlist playlist, int index)
     {
-        if (index < 0 || index >= playlist.Songs.Count)
+        if (!playlist.IsEditable || index < 0 || index >= playlist.Songs.Count)
             return;
 
+        if (playlist is FavoritesPlaylist)
+        {
+            playlist.Songs[index].Favorite = false;   // OnSongFavoriteChanged takes it out
+            return;
+        }
+
         playlist.Songs.RemoveAt(index);
-        SyncPaths(playlist);
+        SyncOrder(playlist);
     }
 
-    public void InsertIntoPlaylist(UserPlaylist playlist, int index, CoreSong song)
+    /// <summary>Puts a song back where it was (undo); into Favorite Songs, it is starred again.</summary>
+    public void InsertIntoPlaylist(Playlist playlist, int index, CoreSong song)
     {
-        playlist.Songs.Insert(Math.Clamp(index, 0, playlist.Songs.Count), song);
-        SyncPaths(playlist);
+        if (!playlist.IsEditable)
+            return;
+
+        if (playlist is FavoritesPlaylist)
+        {
+            song.Favorite = true;   // at the top, then back in its place
+            int at = playlist.Songs.IndexOf(song);
+            int target = Math.Clamp(index, 0, playlist.Songs.Count - 1);
+            if (at >= 0 && at != target)
+                playlist.Songs.Move(at, target);
+        }
+        else
+        {
+            playlist.Songs.Insert(Math.Clamp(index, 0, playlist.Songs.Count), song);
+        }
+
+        SyncOrder(playlist);
     }
 
-    /// <summary>Stores the current song order of a playlist (renumbers the entries).</summary>
-    public void SyncPaths(UserPlaylist playlist)
+    /// <summary>Stores the order of a playlist's songs as it shows (after a drag, say; renumbers the entries).</summary>
+    public void SyncOrder(Playlist playlist)
     {
-        var paths = playlist.Songs.Select(s => s.FilePath).ToList();
-        _playlistPaths[playlist.Id] = paths;
-        _services.PlaylistStore.SetSongs(playlist.Id, paths);
+        switch (playlist)
+        {
+            case UserPlaylist user:
+                var paths = user.Songs.Select(s => s.FilePath).ToList();
+                _playlistPaths[user.Id] = paths;
+                _services.PlaylistStore.SetSongs(user.Id, paths);
+                break;
+
+            case FavoritesPlaylist favorites:
+                // Favorites missing from the library keep their places after the others.
+                var order = favorites.Songs.Select(s => s.FilePath).ToList();
+                var shown = new HashSet<string>(order, StringComparer.OrdinalIgnoreCase);
+                order.AddRange(_favoritePaths.Where(p => !shown.Contains(p)));
+                _favoritePaths = order;
+                _services.PlaylistStore.SetFavorites(order);
+                break;
+        }
     }
 
     private List<string> GetPaths(UserPlaylist playlist)

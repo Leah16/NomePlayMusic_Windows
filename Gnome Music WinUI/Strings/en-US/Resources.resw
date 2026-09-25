@@ -51,6 +51,7 @@
   <data name="Lyrics" xml:space="preserve"><value>Lyrics</value></data>
   <data name="ShowLyrics" xml:space="preserve"><value>Show Lyrics</value></data>
   <data name="HideLyrics" xml:space="preserve"><value>Hide Lyrics</value></data>
+  <data name="ManageLyrics" xml:space="preserve"><value>Manage Lyrics</value></data>
   <data name="LyricsLoading" xml:space="preserve"><value>Getting the lyrics…</value></data>
   <data name="LyricsNotFound" xml:space="preserve"><value>No lyrics found</value></data>
   <data name="LyricsNotSynced" xml:space="preserve"><value>Lyrics not synced</value></data>
@@ -81,6 +82,7 @@
   <!-- Playlists -->
   <data name="MenuDelete" xml:space="preserve"><value>Delete</value></data>
   <data name="MenuRename" xml:space="preserve"><value>Rename…</value></data>
+  <data name="Rename" xml:space="preserve"><value>Rename</value></data>
   <data name="PlaylistName" xml:space="preserve"><value>Playlist Name</value></data>
   <data name="Done" xml:space="preserve"><value>Done</value></data>
   <data name="AddToPlaylist" xml:space="preserve"><value>Add to Playlist</value></data>
@@ -92,12 +94,8 @@
   <data name="PlaylistRemoved" xml:space="preserve"><value>Playlist {0} removed</value></data>
   <data name="SongRemovedFrom" xml:space="preserve"><value>{0} removed from {1}</value></data>
   <data name="Undo" xml:space="preserve"><value>Undo</value></data>
-  <data name="MostPlayed" xml:space="preserve"><value>Most Played</value></data>
-  <data name="NeverPlayed" xml:space="preserve"><value>Never Played</value></data>
   <data name="RecentlyPlayed" xml:space="preserve"><value>Recently Played</value></data>
-  <data name="RecentlyAdded" xml:space="preserve"><value>Recently Added</value></data>
-  <data name="StarredSongs" xml:space="preserve"><value>Starred Songs</value></data>
-  <data name="InsufficientlyTagged" xml:space="preserve"><value>Insufficiently Tagged</value></data>
+  <data name="StarredSongs" xml:space="preserve"><value>Favorite Songs</value></data>
   <data name="AllSongs" xml:space="preserve"><value>All Songs</value></data>
 
   <!-- Status pages -->
@@ -124,15 +122,12 @@
   <data name="RepeatModeSong" xml:space="preserve"><value>Song</value></data>
   <data name="RepeatModeAll" xml:space="preserve"><value>All</value></data>
   <data name="ReplayGain" xml:space="preserve"><value>ReplayGain</value></data>
-  <data name="ReplayGainDescription" xml:space="preserve"><value>Balance loudness between songs if ReplayGain metadata is found</value></data>
   <data name="ReplayGainDisabled" xml:space="preserve"><value>Disabled</value></data>
   <data name="ReplayGainAlbum" xml:space="preserve"><value>Album</value></data>
   <data name="ReplayGainTrack" xml:space="preserve"><value>Track</value></data>
   <data name="PowerSettings" xml:space="preserve"><value>Power Settings</value></data>
   <data name="InhibitSuspend" xml:space="preserve"><value>Inhibit Suspend</value></data>
-  <data name="OnlyWhilePlaying" xml:space="preserve"><value>Only while playing</value></data>
   <data name="MusicFolders" xml:space="preserve"><value>Music Folders</value></data>
-  <data name="MusicFoldersDescription" xml:space="preserve"><value>Folders that are searched for music</value></data>
   <data name="AddFolder" xml:space="preserve"><value>Add Folder…</value></data>
   <data name="RemoveFolder" xml:space="preserve"><value>Remove</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
@@ -178,22 +173,18 @@
   <data name="PrefsPlayback" xml:space="preserve"><value>Playback</value></data>
   <data name="PrefsOutput" xml:space="preserve"><value>Music Output</value></data>
   <data name="PrefsControls" xml:space="preserve"><value>Player Controls</value></data>
+  <data name="PrefsReset" xml:space="preserve"><value>Reset</value></data>
 
   <!-- Preferences: playback processing -->
   <data name="ChannelProcessing" xml:space="preserve"><value>Channels</value></data>
   <data name="PhaseInvert" xml:space="preserve"><value>Invert Polarity</value></data>
-  <data name="PhaseInvertDescription" xml:space="preserve"><value>Turn the waveform of every channel upside down</value></data>
   <data name="MonoOutput" xml:space="preserve"><value>Mono Output</value></data>
-  <data name="MonoOutputDescription" xml:space="preserve"><value>Mix left and right, and play the mix out of both speakers</value></data>
   <data name="SwapChannels" xml:space="preserve"><value>Swap Left and Right</value></data>
-  <data name="SwapChannelsDescription" xml:space="preserve"><value>The left channel out of the right speaker, and the other way round</value></data>
 
   <!-- Preferences: music output -->
   <data name="OutputDevice" xml:space="preserve"><value>Output Device</value></data>
   <data name="AudioInterface" xml:space="preserve"><value>Audio Interface</value></data>
-  <data name="AudioInterfaceDescription" xml:space="preserve"><value>DirectSound and shared WASAPI go through the Windows mixer; ASIO uses the sound card's own driver</value></data>
   <data name="ExclusiveMode" xml:space="preserve"><value>Exclusive Mode</value></data>
-  <data name="ExclusiveModeDescription" xml:space="preserve"><value>Play through the device alone, at each file's own format (bit-perfect)</value></data>
   <data name="Device" xml:space="preserve"><value>Device</value></data>
   <data name="DefaultDevice" xml:space="preserve"><value>Default Device</value></data>
   <data name="NoAsioDriver" xml:space="preserve"><value>No ASIO driver is installed</value></data>
@@ -204,8 +195,6 @@
   <data name="ChannelCounts" xml:space="preserve"><value>Channels</value></data>
   <data name="Checking" xml:space="preserve"><value>Checking…</value></data>
   <data name="NotSupported" xml:space="preserve"><value>None</value></data>
-  <data name="MixerFormat" xml:space="preserve"><value>Through the Windows mixer the device runs at {0}, {1}; exclusive mode can take the formats above as they are.</value></data>
-  <data name="ExclusiveUnsupported" xml:space="preserve"><value>This device takes no format in exclusive mode (a remote or virtual device?); these are the Windows mixer's.</value></data>
   <data name="DopSuffix" xml:space="preserve"><value>DoP</value></data>
   <data name="NativeSuffix" xml:space="preserve"><value>native</value></data>
   <data name="MonoChannel" xml:space="preserve"><value>Mono</value></data>
@@ -216,31 +205,29 @@
   <data name="DsdConvert" xml:space="preserve"><value>Convert to PCM</value></data>
   <data name="DsdDop" xml:space="preserve"><value>DoP (DSD over PCM)</value></data>
   <data name="DsdNative" xml:space="preserve"><value>Native DSD</value></data>
-  <data name="DsdConvertDescription" xml:space="preserve"><value>Works with every device: DSD is converted to 88.2 kHz PCM.</value></data>
-  <data name="DsdDopDescription" xml:space="preserve"><value>Only for a DAC that unpacks DoP; others play loud noise. Needs exclusive mode or ASIO.</value></data>
-  <data name="DsdNativeDescription" xml:space="preserve"><value>Needs an ASIO driver that takes DSD.</value></data>
-  <data name="DsdBitstreamNote" xml:space="preserve"><value>Volume, ReplayGain and mono output do not apply to DoP and native DSD.</value></data>
   <data name="DsdNotPossible" xml:space="preserve"><value>Not possible with this output: DSD is converted to PCM.</value></data>
   <data name="DsdGain" xml:space="preserve"><value>Conversion Gain</value></data>
-  <data name="DsdGainDescription" xml:space="preserve"><value>DSD's reference level comes out at −6 dBFS; raise it to match PCM</value></data>
 
   <!-- Preferences: player controls -->
   <data name="Features" xml:space="preserve"><value>Features</value></data>
   <data name="FeatureMiniPlayer" xml:space="preserve"><value>Mini Player</value></data>
-  <data name="FeatureMiniPlayerDescription" xml:space="preserve"><value>The mini player button in the player bar</value></data>
+  <data name="MiniPlayerMode" xml:space="preserve"><value>Mini player shows</value></data>
+  <data name="MiniPlayerModeCover" xml:space="preserve"><value>Cover</value></data>
+  <data name="MiniPlayerModeControls" xml:space="preserve"><value>Controls</value></data>
+  <data name="MiniPlayerModeLyrics" xml:space="preserve"><value>Lyrics</value></data>
+  <data name="MiniPlayerLyricsNote" xml:space="preserve"><value>Instrumentals and songs without lyrics show the cover for now</value></data>
   <data name="FeatureOutputButton" xml:space="preserve"><value>Quick Device Switch</value></data>
-  <data name="FeatureOutputButtonDescription" xml:space="preserve"><value>The audio output button in the player bar, to switch the audio interface, the device and exclusive mode</value></data>
   <data name="FeatureVolume" xml:space="preserve"><value>Volume Control</value></data>
-  <data name="FeatureVolumeDescription" xml:space="preserve"><value>Off, music plays at full volume without a volume button</value></data>
+  <data name="VolumeControlNote" xml:space="preserve"><value>Note: with Volume Control off, the app's output volume is fixed at 100%</value></data>
   <data name="FeatureLyrics" xml:space="preserve"><value>Lyrics</value></data>
-  <data name="FeatureLyricsDescription" xml:space="preserve"><value>Click the song in the player bar to see its lyrics</value></data>
   <data name="LoadLocalLyrics" xml:space="preserve"><value>Load local lyrics</value></data>
-  <data name="LoadLocalLyricsDescription" xml:space="preserve"><value>Read the .lrc file named like the song in its folder first; search online only when there is none</value></data>
   <data name="DownloadLyrics" xml:space="preserve"><value>Download lyrics</value></data>
-  <data name="DownloadLyricsDescription" xml:space="preserve"><value>Save lyrics found online as a .lrc file named like the song, in its folder</value></data>
+  <data name="LyricsLocation" xml:space="preserve"><value>Save lyrics to</value></data>
+  <data name="LyricsLocationSongFolder" xml:space="preserve"><value>Song folder</value></data>
+  <data name="LyricsLocationCache" xml:space="preserve"><value>Lyrics cache</value></data>
+  <data name="RememberMissingLyrics" xml:space="preserve"><value>Don't search online again for lyrics not found</value></data>
   <data name="Display" xml:space="preserve"><value>Display</value></data>
   <data name="ShowAudioFormat" xml:space="preserve"><value>Show Bit Depth and Sample Rate</value></data>
-  <data name="ShowAudioFormatDescription" xml:space="preserve"><value>A line under the song and artist in the player bar</value></data>
   <data name="OutputFallback" xml:space="preserve"><value>The chosen output cannot be used; playing through the default device</value></data>
   <data name="NoPlaybackDevice" xml:space="preserve"><value>No playback device: paused</value></data>
 
@@ -290,14 +277,19 @@
   <data name="PropNumberOf" xml:space="preserve"><value>{0} of {1}</value></data>
   <data name="SetInstrumental" xml:space="preserve"><value>Set as instrumental</value></data>
   <data name="SetInstrumentalDescription" xml:space="preserve"><value>Look for no lyrics, in the song's folder or online; the lyrics page shows the title, album and artist</value></data>
+  <data name="LyricsSettingsRequired" xml:space="preserve"><value>Turn on the lyrics settings first</value></data>
+  <data name="LyricsSettingsRequiredDetail" xml:space="preserve"><value>Turn on “Lyrics”, “Load local lyrics” and “Download lyrics” in Preferences → Player Controls to set the song as instrumental and to edit and search its lyrics here.</value></data>
+  <data name="OpenPreferences" xml:space="preserve"><value>Open Preferences</value></data>
   <data name="EditLyrics" xml:space="preserve"><value>Edit</value></data>
   <data name="EditLyricsWith" xml:space="preserve"><value>Edit With Another App…</value></data>
-  <data name="EditLyricsUnavailable" xml:space="preserve"><value>Lyrics can be edited once they are saved in the song's folder</value></data>
+  <data name="EditLyricsUnavailable" xml:space="preserve"><value>Lyrics can be edited once they are saved locally, in the song's folder or the lyrics cache</value></data>
   <data name="SearchLyricsOnline" xml:space="preserve"><value>Search Online</value></data>
   <data name="LyricsFromFile" xml:space="preserve"><value>From {0} in the song's folder</value></data>
+  <data name="LyricsFromCache" xml:space="preserve"><value>From the lyrics cache</value></data>
   <data name="LyricsFromLrclib" xml:space="preserve"><value>From LRCLIB: {0}</value></data>
   <data name="LyricsLrclibInstrumental" xml:space="preserve"><value>LRCLIB lists this song as instrumental</value></data>
   <data name="LyricsFileNotLoaded" xml:space="preserve"><value>The song's folder has {0}, but it is not read: “Load local lyrics” is off in Preferences</value></data>
+  <data name="LyricsCacheNotLoaded" xml:space="preserve"><value>The lyrics cache has lyrics for this song, but they are not read: “Load local lyrics” is off in Preferences</value></data>
   <data name="LyricsFailed" xml:space="preserve"><value>LRCLIB could not be reached</value></data>
   <data name="LyricsOpenFailed" xml:space="preserve"><value>Cannot open the lyrics file: {0}</value></data>
   <data name="Retry" xml:space="preserve"><value>Try Again</value></data>
@@ -311,8 +303,23 @@
   <data name="ResultNotSynced" xml:space="preserve"><value>Not synced</value></data>
   <data name="ResultInUse" xml:space="preserve"><value>In use</value></data>
   <data name="DownloadToLocal" xml:space="preserve"><value>Download to Song Folder</value></data>
-  <data name="ReplaceLocalLyrics" xml:space="preserve"><value>Replace Lyrics File</value></data>
+  <data name="DownloadToCache" xml:space="preserve"><value>Download to Lyrics Cache</value></data>
+  <data name="ReplaceLocalLyrics" xml:space="preserve"><value>Replace Saved Lyrics</value></data>
   <data name="ReplaceLyricsConfirm" xml:space="preserve"><value>{0} in the song's folder will be replaced.</value></data>
+  <data name="ReplaceCachedLyricsConfirm" xml:space="preserve"><value>The song's lyrics in the lyrics cache will be replaced.</value></data>
   <data name="Replace" xml:space="preserve"><value>Replace</value></data>
   <data name="LyricsSaveFailed" xml:space="preserve"><value>Cannot save the lyrics: {0}</value></data>
+  <data name="ClearLyricsCache" xml:space="preserve"><value>Clear lyrics cache</value></data>
+  <data name="LyricsCacheSize" xml:space="preserve"><value>{0} files, {1}</value></data>
+  <data name="LyricsCacheEmpty" xml:space="preserve"><value>Empty</value></data>
+  <data name="ClearLyricsCacheConfirm" xml:space="preserve"><value>Delete every file in the lyrics cache? Lyrics files in the song folders are not affected.</value></data>
+  <data name="LyricsCacheCleared" xml:space="preserve"><value>Lyrics cache cleared ({0} files)</value></data>
+  <data name="ClearPlayCounts" xml:space="preserve"><value>Clear play counts</value></data>
+  <data name="ClearPlayCountsConfirm" xml:space="preserve"><value>Set every song's play count back to 0? This cannot be undone.</value></data>
+  <data name="PlayCountsCleared" xml:space="preserve"><value>Play counts cleared</value></data>
+  <data name="ResetSettings" xml:space="preserve"><value>Reset all settings</value></data>
+  <data name="ResetSettingsConfirm" xml:space="preserve"><value>Reset every setting to its default? This cannot be undone.</value></data>
+  <data name="SettingsReset" xml:space="preserve"><value>All settings reset</value></data>
+  <data name="Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="ResetAction" xml:space="preserve"><value>Reset</value></data>
 </root>

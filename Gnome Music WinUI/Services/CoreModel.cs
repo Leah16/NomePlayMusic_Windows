@@ -44,7 +44,7 @@ public sealed partial class CoreModel : ObservableObject, IDisposable
         _rescanTimer.IsRepeating = false;
         _rescanTimer.Tick += (_, _) => Rescan();
 
-        CreateSmartPlaylists();
+        CreateSystemPlaylists();
     }
 
     /// <summary>Raised on the UI thread after the song/album/artist lists changed.</summary>
@@ -95,6 +95,7 @@ public sealed partial class CoreModel : ObservableObject, IDisposable
         }
 
         LoadUserPlaylists();
+        LoadSystemPlaylists();
         WatchFolders();
         Rescan();
     }
@@ -234,7 +235,7 @@ public sealed partial class CoreModel : ObservableObject, IDisposable
 
         BuildAlbumsAndArtists();
         ResolveUserPlaylists();
-        RefreshSmartPlaylists();
+        ResolveSystemPlaylists();
         OnPropertyChanged(nameof(Songs));
         if (wasAvailable != SongsAvailable)
             OnPropertyChanged(nameof(SongsAvailable));

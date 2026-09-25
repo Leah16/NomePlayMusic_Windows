@@ -53,6 +53,7 @@
   <data name="Lyrics" xml:space="preserve"><value>歌词</value></data>
   <data name="ShowLyrics" xml:space="preserve"><value>显示歌词</value></data>
   <data name="HideLyrics" xml:space="preserve"><value>隐藏歌词</value></data>
+  <data name="ManageLyrics" xml:space="preserve"><value>管理歌词</value></data>
   <data name="LyricsLoading" xml:space="preserve"><value>正在获取歌词…</value></data>
   <data name="LyricsNotFound" xml:space="preserve"><value>没获取到</value></data>
   <data name="LyricsNotSynced" xml:space="preserve"><value>歌词未同步</value></data>
@@ -84,6 +85,7 @@
   <!-- Playlists -->
   <data name="MenuDelete" xml:space="preserve"><value>移除</value></data>
   <data name="MenuRename" xml:space="preserve"><value>重命名…</value></data>
+  <data name="Rename" xml:space="preserve"><value>重命名</value></data>
   <data name="PlaylistName" xml:space="preserve"><value>播放列表名</value></data>
   <data name="Done" xml:space="preserve"><value>完成</value></data>
   <data name="AddToPlaylist" xml:space="preserve"><value>添加到播放列表</value></data>
@@ -95,12 +97,8 @@
   <data name="PlaylistRemoved" xml:space="preserve"><value>播放列表 {0} 已移除</value></data>
   <data name="SongRemovedFrom" xml:space="preserve"><value>{0} 已从 {1} 移除</value></data>
   <data name="Undo" xml:space="preserve"><value>撤消</value></data>
-  <data name="MostPlayed" xml:space="preserve"><value>最多播放</value></data>
-  <data name="NeverPlayed" xml:space="preserve"><value>从未播放</value></data>
   <data name="RecentlyPlayed" xml:space="preserve"><value>最近播放</value></data>
-  <data name="RecentlyAdded" xml:space="preserve"><value>最近添加</value></data>
   <data name="StarredSongs" xml:space="preserve"><value>收藏歌曲</value></data>
-  <data name="InsufficientlyTagged" xml:space="preserve"><value>标记不足</value></data>
   <data name="AllSongs" xml:space="preserve"><value>全部歌曲</value></data>
 
   <!-- Status pages -->
@@ -128,16 +126,13 @@
   <data name="RepeatModeSong" xml:space="preserve"><value>歌曲</value></data>
   <data name="RepeatModeAll" xml:space="preserve"><value>全部</value></data>
   <data name="ReplayGain" xml:space="preserve"><value>回放增益</value></data>
-  <data name="ReplayGainDescription" xml:space="preserve"><value>如果找到了回放增益元数据，则平衡歌曲之间的响度</value></data>
   <data name="ReplayGainDisabled" xml:space="preserve"><value>已禁用</value></data>
   <data name="ReplayGainAlbum" xml:space="preserve"><value>专辑</value></data>
   <data name="ReplayGainTrack" xml:space="preserve"><value>曲目</value></data>
   <data name="PowerSettings" xml:space="preserve"><value>电源设置</value></data>
   <data name="InhibitSuspend" xml:space="preserve"><value>禁止挂起</value></data>
-  <data name="OnlyWhilePlaying" xml:space="preserve"><value>只在播放的时候</value></data>
   <!-- port -->
   <data name="MusicFolders" xml:space="preserve"><value>音乐文件夹</value></data>
-  <data name="MusicFoldersDescription" xml:space="preserve"><value>在这些文件夹中查找音乐</value></data>
   <data name="AddFolder" xml:space="preserve"><value>添加文件夹…</value></data>
   <data name="RemoveFolder" xml:space="preserve"><value>移除</value></data>
   <data name="Close" xml:space="preserve"><value>关闭</value></data>
@@ -191,22 +186,18 @@ Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
   <data name="PrefsPlayback" xml:space="preserve"><value>播放</value></data>
   <data name="PrefsOutput" xml:space="preserve"><value>音乐输出</value></data>
   <data name="PrefsControls" xml:space="preserve"><value>播放器控制</value></data>
+  <data name="PrefsReset" xml:space="preserve"><value>重置</value></data>
 
   <!-- port: playback processing -->
   <data name="ChannelProcessing" xml:space="preserve"><value>声道处理</value></data>
   <data name="PhaseInvert" xml:space="preserve"><value>相位反转</value></data>
-  <data name="PhaseInvertDescription" xml:space="preserve"><value>反转所有声道的波形极性</value></data>
   <data name="MonoOutput" xml:space="preserve"><value>单声道输出</value></data>
-  <data name="MonoOutputDescription" xml:space="preserve"><value>左右声道混合后从两侧同时输出</value></data>
   <data name="SwapChannels" xml:space="preserve"><value>左右声道互换</value></data>
-  <data name="SwapChannelsDescription" xml:space="preserve"><value>左声道从右侧输出，右声道从左侧输出</value></data>
 
   <!-- port: music output -->
   <data name="OutputDevice" xml:space="preserve"><value>输出设备</value></data>
   <data name="AudioInterface" xml:space="preserve"><value>音频接口</value></data>
-  <data name="AudioInterfaceDescription" xml:space="preserve"><value>DirectSound 和 WASAPI 共享模式经过 Windows 混音器；ASIO 使用声卡自己的驱动</value></data>
   <data name="ExclusiveMode" xml:space="preserve"><value>独占模式</value></data>
-  <data name="ExclusiveModeDescription" xml:space="preserve"><value>独占设备，按文件原本的格式输出（比特完美）</value></data>
   <data name="Device" xml:space="preserve"><value>设备</value></data>
   <data name="DefaultDevice" xml:space="preserve"><value>默认设备</value></data>
   <data name="NoAsioDriver" xml:space="preserve"><value>未安装 ASIO 驱动</value></data>
@@ -217,8 +208,6 @@ Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
   <data name="ChannelCounts" xml:space="preserve"><value>声道</value></data>
   <data name="Checking" xml:space="preserve"><value>正在检测…</value></data>
   <data name="NotSupported" xml:space="preserve"><value>不支持</value></data>
-  <data name="MixerFormat" xml:space="preserve"><value>经过 Windows 混音器时设备以 {0}、{1}运行；独占模式可以按上面的格式原样输出。</value></data>
-  <data name="ExclusiveUnsupported" xml:space="preserve"><value>此设备不支持独占模式（可能是远程或虚拟设备），以上是 Windows 混音器使用的格式。</value></data>
   <data name="DopSuffix" xml:space="preserve"><value>DoP</value></data>
   <data name="NativeSuffix" xml:space="preserve"><value>原生</value></data>
   <data name="MonoChannel" xml:space="preserve"><value>单声道</value></data>
@@ -229,31 +218,29 @@ Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
   <data name="DsdConvert" xml:space="preserve"><value>转换为 PCM</value></data>
   <data name="DsdDop" xml:space="preserve"><value>DoP（DSD over PCM）</value></data>
   <data name="DsdNative" xml:space="preserve"><value>原生 DSD</value></data>
-  <data name="DsdConvertDescription" xml:space="preserve"><value>适用于所有设备：DSD 转换为 88.2 kHz PCM 播放。</value></data>
-  <data name="DsdDopDescription" xml:space="preserve"><value>仅用于支持 DoP 的 DAC，否则会发出很响的噪声。需要 WASAPI 独占模式或 ASIO。</value></data>
-  <data name="DsdNativeDescription" xml:space="preserve"><value>需要支持 DSD 的 ASIO 驱动。</value></data>
-  <data name="DsdBitstreamNote" xml:space="preserve"><value>DoP 和原生 DSD 不经过音量、回放增益和单声道处理。</value></data>
   <data name="DsdNotPossible" xml:space="preserve"><value>当前输出无法使用这种方式，DSD 会转换为 PCM 播放。</value></data>
   <data name="DsdGain" xml:space="preserve"><value>转换增益</value></data>
-  <data name="DsdGainDescription" xml:space="preserve"><value>DSD 参考电平转换后为 −6 dBFS，可提升到与 PCM 相当</value></data>
 
   <!-- port: player controls -->
   <data name="Features" xml:space="preserve"><value>功能</value></data>
   <data name="FeatureMiniPlayer" xml:space="preserve"><value>小窗</value></data>
-  <data name="FeatureMiniPlayerDescription" xml:space="preserve"><value>播放栏里的小窗按钮</value></data>
+  <data name="MiniPlayerMode" xml:space="preserve"><value>小窗模式</value></data>
+  <data name="MiniPlayerModeCover" xml:space="preserve"><value>专辑封面</value></data>
+  <data name="MiniPlayerModeControls" xml:space="preserve"><value>播放控制</value></data>
+  <data name="MiniPlayerModeLyrics" xml:space="preserve"><value>歌词</value></data>
+  <data name="MiniPlayerLyricsNote" xml:space="preserve"><value>纯音乐或找不到歌词的歌曲会暂时显示专辑封面</value></data>
   <data name="FeatureOutputButton" xml:space="preserve"><value>设备快速切换</value></data>
-  <data name="FeatureOutputButtonDescription" xml:space="preserve"><value>播放栏里的音频输出按钮，用来切换音频接口、设备和独占模式</value></data>
   <data name="FeatureVolume" xml:space="preserve"><value>音量控制</value></data>
-  <data name="FeatureVolumeDescription" xml:space="preserve"><value>关闭后以最大音量播放，不显示音量按钮</value></data>
+  <data name="VolumeControlNote" xml:space="preserve"><value>注意：关闭软件音量控制后软件输出音量则固定为100%</value></data>
   <data name="FeatureLyrics" xml:space="preserve"><value>歌词</value></data>
-  <data name="FeatureLyricsDescription" xml:space="preserve"><value>点击播放栏里的歌曲查看歌词</value></data>
   <data name="LoadLocalLyrics" xml:space="preserve"><value>加载本地歌词</value></data>
-  <data name="LoadLocalLyricsDescription" xml:space="preserve"><value>先读取歌曲文件夹里与歌曲同名的 .lrc 文件，没有时再到云端搜索</value></data>
   <data name="DownloadLyrics" xml:space="preserve"><value>从云端下载歌词</value></data>
-  <data name="DownloadLyricsDescription" xml:space="preserve"><value>把云端找到的歌词保存为歌曲文件夹里与歌曲同名的 .lrc 文件</value></data>
+  <data name="LyricsLocation" xml:space="preserve"><value>歌词保存位置</value></data>
+  <data name="LyricsLocationSongFolder" xml:space="preserve"><value>歌曲文件夹</value></data>
+  <data name="LyricsLocationCache" xml:space="preserve"><value>歌词缓存</value></data>
+  <data name="RememberMissingLyrics" xml:space="preserve"><value>不重复在云端寻找无结果歌词</value></data>
   <data name="Display" xml:space="preserve"><value>显示</value></data>
   <data name="ShowAudioFormat" xml:space="preserve"><value>显示位深与采样率</value></data>
-  <data name="ShowAudioFormatDescription" xml:space="preserve"><value>在播放栏的歌名和歌手下方显示一行</value></data>
   <data name="OutputFallback" xml:space="preserve"><value>无法使用所选的输出设备，已改用默认设备播放</value></data>
   <data name="NoPlaybackDevice" xml:space="preserve"><value>没有可用的播放设备，已暂停</value></data>
 
@@ -303,14 +290,19 @@ Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
   <data name="PropNumberOf" xml:space="preserve"><value>{0}（共 {1}）</value></data>
   <data name="SetInstrumental" xml:space="preserve"><value>设定为纯音乐</value></data>
   <data name="SetInstrumentalDescription" xml:space="preserve"><value>不在本地或云端查找这首歌的歌词，歌词页面只显示歌曲名、专辑和艺术家</value></data>
+  <data name="LyricsSettingsRequired" xml:space="preserve"><value>需要先开启歌词设置</value></data>
+  <data name="LyricsSettingsRequiredDetail" xml:space="preserve"><value>请在 首选项 → 播放器控制 中同时开启“歌词”“加载本地歌词”和“从云端下载歌词”，才能在这里设定纯音乐、编辑和搜索歌词。</value></data>
+  <data name="OpenPreferences" xml:space="preserve"><value>打开首选项</value></data>
   <data name="EditLyrics" xml:space="preserve"><value>编辑</value></data>
   <data name="EditLyricsWith" xml:space="preserve"><value>用其他应用编辑…</value></data>
-  <data name="EditLyricsUnavailable" xml:space="preserve"><value>歌词保存在本地后才能编辑</value></data>
+  <data name="EditLyricsUnavailable" xml:space="preserve"><value>歌词保存在本地（歌曲文件夹或歌词缓存）后才能编辑</value></data>
   <data name="SearchLyricsOnline" xml:space="preserve"><value>在云端搜索</value></data>
   <data name="LyricsFromFile" xml:space="preserve"><value>来自歌曲文件夹里的 {0}</value></data>
+  <data name="LyricsFromCache" xml:space="preserve"><value>来自歌词缓存</value></data>
   <data name="LyricsFromLrclib" xml:space="preserve"><value>来自 LRCLIB：{0}</value></data>
   <data name="LyricsLrclibInstrumental" xml:space="preserve"><value>LRCLIB 把这首歌标为纯音乐</value></data>
   <data name="LyricsFileNotLoaded" xml:space="preserve"><value>歌曲文件夹里有 {0}，但首选项里的“加载本地歌词”已关闭，所以没有读取它</value></data>
+  <data name="LyricsCacheNotLoaded" xml:space="preserve"><value>歌词缓存里有这首歌的歌词，但首选项里的“加载本地歌词”已关闭，所以没有读取它</value></data>
   <data name="LyricsFailed" xml:space="preserve"><value>无法连接 LRCLIB</value></data>
   <data name="LyricsOpenFailed" xml:space="preserve"><value>无法打开歌词文件：{0}</value></data>
   <data name="Retry" xml:space="preserve"><value>重试</value></data>
@@ -323,9 +315,24 @@ Boyuan Yang &lt;byang@debian.org&gt;, 2022</value></data>
   <data name="ResultSynced" xml:space="preserve"><value>同步歌词</value></data>
   <data name="ResultNotSynced" xml:space="preserve"><value>未同步</value></data>
   <data name="ResultInUse" xml:space="preserve"><value>正在使用</value></data>
-  <data name="DownloadToLocal" xml:space="preserve"><value>下载到本地</value></data>
+  <data name="DownloadToLocal" xml:space="preserve"><value>下载到歌曲文件夹</value></data>
+  <data name="DownloadToCache" xml:space="preserve"><value>下载到歌词缓存</value></data>
   <data name="ReplaceLocalLyrics" xml:space="preserve"><value>替换本地歌词</value></data>
   <data name="ReplaceLyricsConfirm" xml:space="preserve"><value>歌曲文件夹里的 {0} 会被替换。</value></data>
+  <data name="ReplaceCachedLyricsConfirm" xml:space="preserve"><value>歌词缓存里这首歌的歌词会被替换。</value></data>
   <data name="Replace" xml:space="preserve"><value>替换</value></data>
   <data name="LyricsSaveFailed" xml:space="preserve"><value>无法保存歌词：{0}</value></data>
+  <data name="ClearLyricsCache" xml:space="preserve"><value>清除歌词缓存</value></data>
+  <data name="LyricsCacheSize" xml:space="preserve"><value>{0} 个文件，{1}</value></data>
+  <data name="LyricsCacheEmpty" xml:space="preserve"><value>空</value></data>
+  <data name="ClearLyricsCacheConfirm" xml:space="preserve"><value>删除歌词缓存里的所有文件？歌曲文件夹里的歌词文件不受影响。</value></data>
+  <data name="LyricsCacheCleared" xml:space="preserve"><value>已清除歌词缓存（{0} 个文件）</value></data>
+  <data name="ClearPlayCounts" xml:space="preserve"><value>清除播放计数</value></data>
+  <data name="ClearPlayCountsConfirm" xml:space="preserve"><value>把所有歌曲的播放次数归零？此操作无法撤销。</value></data>
+  <data name="PlayCountsCleared" xml:space="preserve"><value>已清除播放计数</value></data>
+  <data name="ResetSettings" xml:space="preserve"><value>还原所有设置</value></data>
+  <data name="ResetSettingsConfirm" xml:space="preserve"><value>把所有设置还原为默认值？此操作无法撤销。</value></data>
+  <data name="SettingsReset" xml:space="preserve"><value>已还原所有设置</value></data>
+  <data name="Clear" xml:space="preserve"><value>清除</value></data>
+  <data name="ResetAction" xml:space="preserve"><value>还原</value></data>
 </root>

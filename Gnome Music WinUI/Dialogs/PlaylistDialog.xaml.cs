@@ -12,7 +12,7 @@ namespace Gnome_Music_WinUI.Dialogs;
 
 /// <summary>
 /// "Add to Playlist" (widgets/playlistdialog.py): pick a user playlist, or create
-/// one, and append the songs to it.
+/// one, and append the songs to it. The port also offers Favorite Songs (it stars them).
 /// </summary>
 public sealed partial class PlaylistDialog : ContentDialog
 {
@@ -24,7 +24,7 @@ public sealed partial class PlaylistDialog : ContentDialog
         _songs = songs;
         InitializeComponent();
 
-        var playlists = _model.UserPlaylists.ToList();
+        var playlists = _model.EditablePlaylists.ToList();
         bool empty = playlists.Count == 0;
         EmptyBox.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
         NormalBox.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
@@ -52,7 +52,7 @@ public sealed partial class PlaylistDialog : ContentDialog
 
     private void OnPlaylistSelected(object sender, SelectionChangedEventArgs e)
     {
-        bool selected = PlaylistsList.SelectedItem is UserPlaylist;
+        bool selected = PlaylistsList.SelectedItem is Playlist;
         IsPrimaryButtonEnabled = selected;
         if (selected)
         {
@@ -81,7 +81,7 @@ public sealed partial class PlaylistDialog : ContentDialog
 
     private void OnAddClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        if (PlaylistsList.SelectedItem is UserPlaylist playlist)
+        if (PlaylistsList.SelectedItem is Playlist playlist)
             _model.AddToPlaylist(playlist, _songs);
     }
 

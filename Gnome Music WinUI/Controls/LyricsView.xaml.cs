@@ -24,7 +24,8 @@ namespace Gnome_Music_WinUI.Controls;
 /// full color and kept a little above the middle, played lines are faint and the next
 /// ones in between; clicking a line plays the song from there. Plain lyrics are all in
 /// full color, under a note that they are not synced. An instrumental shows its title,
-/// album and artist. <see cref="MainWindow"/> opens and closes the view.
+/// album and artist. <see cref="MainWindow"/> opens and closes the view; the mini
+/// player has a <see cref="Compact"/> one.
 /// </summary>
 public sealed partial class LyricsView : UserControl
 {
@@ -78,6 +79,15 @@ public sealed partial class LyricsView : UserControl
     private double _bottomInset;
     private bool _open;
     private bool _following = true;
+    private bool _compact;
+    private bool _hasLyrics;
+
+    /// <summary>
+    /// The compact view's scroll position. Its scroller takes no input and never
+    /// scrolls: the lines move instead (<see cref="ScrollTo"/>).
+    /// </summary>
+    private double _compactOffset;
+    private Storyboard? _linesStoryboard;
 
     /// <summary>Where the view is scrolling to by itself; other scrolling is the user's.</summary>
     private double? _scrollTarget;
@@ -125,8 +135,15 @@ public sealed partial class LyricsView : UserControl
 
         SizeChanged += OnSizeChanged;
 
-        // The song set as instrumental or not, its lyrics saved, local lyrics turned on or off
+        // The song set as instrumental or not, its lyrics saved, local lyrics turned on or
+        // off. (The mini player's view goes with its window: it lets go when unloaded.)
         App.Services.Lyrics.Changed += OnLyricsChanged;
+        Loaded += (_, _) =>
+        {
+            App.Services.Lyrics.Changed -= OnLyricsChanged;
+            App.Services.Lyrics.Changed += OnLyricsChanged;
+        };
+        Unloaded += (_, _) => App.Services.Lyrics.Changed -= OnLyricsChanged;
 
         // When the user scrolls the lyrics (wheel, touch, scroll bar, keys), the view
         // stops following the song for a while. The wheel is caught at once, also while
@@ -147,6 +164,51 @@ public sealed partial class LyricsView : UserControl
 
     /// <summary>Raised when the view has come up and covers the content.</summary>
     public event EventHandler? Opened;
+
+    /// <summary>Raised when <see cref="HasLyrics"/> changes.</summary>
+    public event EventHandler? HasLyricsChanged;
+
+    /// <summary>The song's lyrics show: not loading, not an instrumental, not "No lyrics found".</summary>
+    public bool HasLyrics
+    {
+        get => _hasLyrics;
+        private set
+        {
+            if (value == _hasLyrics)
+                return;
+
+            _hasLyrics = value;
+            HasLyricsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>
+    /// The mini player's lyrics, set where the view is declared: fewer and smaller lines
+    /// for the small square, only to be read. The lines cannot be clicked, the view has
+    /// no menu and takes no pointer or keyboard input, so it is not scrolled by hand;
+    /// the lines move to the next one with an animation all the same (see
+    /// <see cref="_compactOffset"/>). The note above the lines is left out, and lyrics
+    /// without times scroll along with the song.
+    /// </summary>
+    public bool Compact
+    {
+        get => _compact;
+        set
+        {
+            _compact = value;
+            if (!value)
+                return;
+
+            Surface.ContextFlyout = null;
+            Scroller.VerticalScrollMode = ScrollMode.Disabled;
+            Scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            Scroller.IsTabStop = false;
+            IsHitTestVisible = false;
+        }
+    }
+
+    /// <summary>Where the lines are scrolled to.</summary>
+    private double ScrollOffset => Compact ? _compactOffset : Scroller.VerticalOffset;
 
     /// <summary>
     /// The height at the bottom of the view that the player bar covers while it shows.
@@ -234,21 +296,28 @@ public sealed partial class LyricsView : UserControl
 
     /// <summary>
     /// Back in the window (from an editor, say): the lyrics load again when the song's
-    /// lyrics file they were looked up with has changed, come or gone.
+    /// lyrics file or cached lyrics they were looked up with have changed, come or gone.
     /// </summary>
     public async void CheckLyricsFile()
     {
-        if (_song is not { } song || _result?.LocalFile is not { } stamp)
+        if (_song is not { } song || _result?.LocalFiles is not { } files)
             return;
 
-        var now = await System.Threading.Tasks.Task.Run(() => LyricsFile.Stamp(LyricsFile.PathFor(song.FilePath)));
-        if (song != _song || now == stamp)
+        var now = await System.Threading.Tasks.Task.Run(() => LyricsService.Stamp(song));
+        if (song != _song || now == files)
             return;
 
         if (_open)
             Load(song);
         else
             _stale = true;
+    }
+
+    /// <summary>The page's menu: the song's properties, at their lyrics page.</summary>
+    private void OnManageLyricsClick(object sender, RoutedEventArgs e)
+    {
+        if (_song is { } song)
+            App.MainWindow?.ShowSongProperties(song, lyrics: true);
     }
 
     private async void Load(CoreSong? song)
@@ -307,6 +376,7 @@ public sealed partial class LyricsView : UserControl
         _current = -2;
         Hint.Visibility = Visibility.Collapsed;
         ScrollTo(0, animate: false);
+        HasLyrics = result is { Status: not LyricsStatus.Instrumental, Lyrics: not null };
         if (result is null)
             return;
 
@@ -352,6 +422,9 @@ public sealed partial class LyricsView : UserControl
 
     private void ShowHint(string text)
     {
+        if (Compact)
+            return;
+
         Hint.Text = text;
         Hint.Visibility = Visibility.Visible;
     }
@@ -370,10 +443,12 @@ public sealed partial class LyricsView : UserControl
         if (scale != 1)
             label.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
 
-        FrameworkElement element;
-        if (time is { } t)
-        {
+        if (time is not null)
             label.Opacity = UnplayedOpacity;
+
+        FrameworkElement element;
+        if (time is { } t && !Compact)
+        {
             var button = new Button { Style = (Style)Resources["LyricButtonStyle"], Content = label, Tag = t };
             AutomationProperties.SetName(button, text);
             button.Click += OnLineClick;
@@ -398,7 +473,11 @@ public sealed partial class LyricsView : UserControl
     {
         _lineTimer.Stop();
         if (_times.Length == 0)
+        {
+            if (Compact)
+                FollowProgress();
             return;
+        }
 
         bool playing = _player.State == PlayerState.Playing;
         double position = (playing || _player.State == PlayerState.Paused ? _player.Position : 0) + Lead;
@@ -476,10 +555,11 @@ public sealed partial class LyricsView : UserControl
         if (!_following || CurrentLine() is not { } line || line.Element.ActualHeight <= 0 || Scroller.ViewportHeight <= 0)
             return;
 
+        // Where the line is in the column, wherever the lines are on their way (LinesTranslate).
         double top;
         try
         {
-            top = line.Element.TransformToVisual(Column).TransformPoint(default).Y;
+            top = line.Element.TransformToVisual(LinesPanel).TransformPoint(default).Y + LinesPanel.ActualOffset.Y;
         }
         catch (ArgumentException)
         {
@@ -489,15 +569,74 @@ public sealed partial class LyricsView : UserControl
         double visible = Math.Max(0, Scroller.ViewportHeight - BottomInset);
         double target = top + line.Element.ActualHeight / 2 - visible * FollowPosition;
         target = Math.Clamp(target, 0, Math.Max(0, Scroller.ScrollableHeight));
-        if (Math.Abs(target - Scroller.VerticalOffset) >= 1)
+        if (Math.Abs(target - ScrollOffset) >= 1)
             ScrollTo(target, animate);
     }
 
+    /// <summary>
+    /// Lyrics without times in the compact view, which is not scrolled by hand: they
+    /// scroll through as the song plays.
+    /// </summary>
+    private void FollowProgress()
+    {
+        if (_lines.Count == 0 || _player.Duration <= 0 || Scroller.ScrollableHeight <= 0)
+            return;
+
+        double target = Scroller.ScrollableHeight * Math.Clamp(_player.Position / _player.Duration, 0, 1);
+        if (Math.Abs(target - ScrollOffset) >= 1)
+            ScrollTo(target, animate: false);
+    }
+
+    /// <summary>
+    /// Scrolls the lines to <paramref name="offset"/>. The scroller's own animation runs
+    /// only with the system's animations on (off in a Remote Desktop session, say), so
+    /// the view gets there at once and the lines follow from where they were with an
+    /// animation of their own. The compact view does not scroll: its lines just move.
+    /// </summary>
     private void ScrollTo(double offset, bool animate)
     {
+        double from = ScrollOffset;
+        if (Compact)
+        {
+            _compactOffset = offset;
+            MoveLines(-from, -offset, animate);
+            return;
+        }
+
         _scrollTarget = offset;
-        if (!Scroller.ChangeView(null, offset, null, disableAnimation: !animate))
+        if (!Scroller.ChangeView(null, offset, null, disableAnimation: true))
+        {
             _scrollTarget = null;
+            return;
+        }
+
+        MoveLines(offset - from, 0, animate);
+    }
+
+    /// <summary>
+    /// Moves the lines (LinesTranslate) from <paramref name="from"/> to
+    /// <paramref name="to"/> in 400 ms, easing out; at once when not animated. A move
+    /// still under way is cut short: the next starts from where that one was going.
+    /// </summary>
+    private void MoveLines(double from, double to, bool animate)
+    {
+        _linesStoryboard?.Stop();
+        LinesTranslate.Y = to;
+        if (!animate || from == to)
+            return;
+
+        var animation = new DoubleAnimation
+        {
+            From = from,
+            To = to,
+            Duration = new Duration(TimeSpan.FromMilliseconds(400)),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        };
+        Storyboard.SetTarget(animation, LinesTranslate);
+        Storyboard.SetTargetProperty(animation, "Y");
+        _linesStoryboard = new Storyboard();
+        _linesStoryboard.Children.Add(animation);
+        _linesStoryboard.Begin();
     }
 
     /// <summary>
@@ -524,20 +663,22 @@ public sealed partial class LyricsView : UserControl
     /// <summary>
     /// Large text on large windows, in a column centred in the view. The top padding
     /// scrolls with the lines; the bottom padding lets the last line reach its place
-    /// above the player bar. The current line keeps its place.
+    /// above the player bar. The current line keeps its place. The compact view keeps
+    /// the text readable in the small square, with fewer lines.
     /// </summary>
     private void LayOutColumn(double width, double height)
     {
         if (width <= 0)
             return;
 
-        double margin = width < 600 ? 24 : 48;
+        double margin = Compact ? 16 : width < 600 ? 24 : 48;
+        double edge = Compact ? 16 : 40;
         double side = Math.Max(margin, (width - MaxLineWidth) / 2);
         double visible = Math.Max(0, height - BottomInset);
         Column.Width = width;
-        Column.Padding = new Thickness(side, Padding.Top + 40, side, Math.Max(40, height - visible * FollowPosition));
+        Column.Padding = new Thickness(side, Padding.Top + edge, side, Math.Max(edge, height - visible * FollowPosition));
 
-        double fontSize = Math.Clamp(Math.Round(width / 28), 24, 40);
+        double fontSize = Compact ? Math.Clamp(Math.Round(width / 11), 16, 32) : Math.Clamp(Math.Round(width / 28), 24, 40);
         if (fontSize != _fontSize)
         {
             _fontSize = fontSize;

@@ -4,11 +4,13 @@
     x:Class="Gnome_Music_WinUI.MiniPlayerWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Gnome_Music_WinUI.Controls"
     xmlns:h="using:Gnome_Music_WinUI.Helpers">
 
     <!-- The mini player (not in GNOME Music), after the Windows media player's: the
          cover fills the window. Pointing at it shows the controls over a blurred, dimmed
-         copy of the cover, which is always dark, hence the dark theme. -->
+         copy of the cover (in the lyrics mode, of the lyrics), which is always dark,
+         hence the dark theme. -->
     <Grid
         x:Name="RootGrid"
         Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
@@ -26,14 +28,36 @@
             Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
         <Image x:Name="ArtImage" Stretch="UniformToFill" />
 
+        <!-- The lyrics mode: the lyrics page's lines on white, in the light theme like
+             the page; the cover shows through while a song has none -->
+        <Grid
+            x:Name="LyricsLayer"
+            IsHitTestVisible="False"
+            Opacity="0"
+            RequestedTheme="Light">
+            <Grid.OpacityTransition>
+                <ScalarTransition Duration="0:0:0.2" />
+            </Grid.OpacityTransition>
+            <controls:LyricsView x:Name="MiniLyrics" Compact="True" />
+        </Grid>
+
         <Grid x:Name="Overlay" Opacity="0">
             <Grid.OpacityTransition>
                 <ScalarTransition Duration="0:0:0.2" />
             </Grid.OpacityTransition>
 
             <Image x:Name="BlurImage" Stretch="UniformToFill" />
-            <!-- Dims any cover enough for the white glyphs and text -->
-            <Border Background="Black" Opacity="0.4" />
+            <!-- Over the lyrics, instead: the white page itself blurred (BlurLyrics) -->
+            <Image
+                x:Name="LyricsBlurImage"
+                Stretch="Fill"
+                Visibility="Collapsed" />
+            <!-- Dims either enough for the white glyphs and text: any cover, and the
+                 white page more (UpdateMode) -->
+            <Border
+                x:Name="Veil"
+                Background="Black"
+                Opacity="0.4" />
 
             <!-- The thin transport glyphs of Segoe MDL2 Assets, like the media player's -->
             <StackPanel
@@ -84,7 +108,9 @@
                 </Button>
             </StackPanel>
 
+            <!-- The song, under the buttons; it hides in a small window (SongLabelsMinSize) -->
             <StackPanel
+                x:Name="SongLabels"
                 Margin="16,0,16,40"
                 VerticalAlignment="Bottom"
                 Spacing="4">
@@ -120,8 +146,11 @@
             </Button>
         </Grid>
 
-        <!-- The progress along the bottom edge -->
-        <Grid Height="4" VerticalAlignment="Bottom">
+        <!-- The progress along the bottom edge (not over the lyrics) -->
+        <Grid
+            x:Name="ProgressLine"
+            Height="4"
+            VerticalAlignment="Bottom">
             <Rectangle Fill="White" Opacity="0.3" />
             <Rectangle Fill="White" RenderTransformOrigin="0,0">
                 <Rectangle.RenderTransform>

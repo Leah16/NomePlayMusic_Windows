@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gnome_Music_WinUI.Services;
 
@@ -74,6 +75,44 @@ public sealed class UserDataStore
         }
 
         _saver.Schedule();
+    }
+
+    /// <summary>The starred songs, the latest added first: Favorite Songs before the user orders it.</summary>
+    public List<string> FavoritePaths()
+    {
+        lock (_lock)
+        {
+            return _songs.Where(s => s.Value.Favorite).OrderByDescending(s => s.Value.Added).Select(s => s.Key).ToList();
+        }
+    }
+
+    /// <summary>The songs played, the latest first: Recently Played before it keeps its own history.</summary>
+    public List<string> PlayedPaths(int limit)
+    {
+        lock (_lock)
+        {
+            return _songs.Where(s => s.Value.LastPlayed > 0).OrderByDescending(s => s.Value.LastPlayed).Take(limit).Select(s => s.Key).ToList();
+        }
+    }
+
+    /// <summary>Every song's play count back to 0 (Preferences → Reset); the rest stays. Returns how many songs had plays.</summary>
+    public int ClearPlayCounts()
+    {
+        int cleared = 0;
+        lock (_lock)
+        {
+            foreach (var data in _songs.Values)
+            {
+                if (data.PlayCount == 0)
+                    continue;
+                data.PlayCount = 0;
+                cleared++;
+            }
+        }
+
+        if (cleared > 0)
+            _saver.Schedule();
+        return cleared;
     }
 
     public void Flush() => _saver.Flush();

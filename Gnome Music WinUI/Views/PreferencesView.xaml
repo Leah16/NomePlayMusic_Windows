@@ -64,28 +64,34 @@
                 ItemContainerStyle="{StaticResource CategoryItemStyle}"
                 SelectionChanged="OnCategoryChanged"
                 SelectionMode="Single">
-                <ListViewItem Tag="playback">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.PrefsPlayback}" Tag="playback">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE768;" />
                         <TextBlock Text="{x:Bind h:Strings.PrefsPlayback}" />
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Tag="output">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.PrefsOutput}" Tag="output">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE7F5;" />
                         <TextBlock Text="{x:Bind h:Strings.PrefsOutput}" />
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Tag="controls">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.PrefsControls}" Tag="controls">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE9E9;" />
                         <TextBlock Text="{x:Bind h:Strings.PrefsControls}" />
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Tag="folders">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.MusicFolders}" Tag="folders">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE8B7;" />
                         <TextBlock Text="{x:Bind h:Strings.MusicFolders}" />
+                    </StackPanel>
+                </ListViewItem>
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.PrefsReset}" Tag="reset">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="16" Glyph="&#xE777;" />
+                        <TextBlock Text="{x:Bind h:Strings.PrefsReset}" />
                     </StackPanel>
                 </ListViewItem>
             </ListView>
@@ -98,13 +104,13 @@
                 ItemContainerStyle="{StaticResource CategoryItemStyle}"
                 SelectionChanged="OnCategoryChanged"
                 SelectionMode="Single">
-                <ListViewItem Tag="shortcuts">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.KeyboardShortcuts}" Tag="shortcuts">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE765;" />
                         <TextBlock Text="{x:Bind h:Strings.KeyboardShortcuts}" />
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Tag="about">
+                <ListViewItem AutomationProperties.Name="{x:Bind h:Strings.About}" Tag="about">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon FontSize="16" Glyph="&#xE946;" />
                         <TextBlock Text="{x:Bind h:Strings.About}" />
@@ -154,7 +160,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.ReplayGain}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.ReplayGainDescription}" />
                                         </StackPanel>
                                         <ComboBox
                                             x:Name="ReplayGainCombo"
@@ -181,7 +186,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.PhaseInvert}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.PhaseInvertDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="InvertSwitch"
@@ -198,7 +202,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.MonoOutput}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.MonoOutputDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="MonoSwitch"
@@ -215,7 +218,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.SwapChannels}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.SwapChannelsDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="SwapSwitch"
@@ -236,7 +238,6 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind h:Strings.InhibitSuspend}" />
-                                        <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.OnlyWhilePlaying}" />
                                     </StackPanel>
                                     <ToggleSwitch
                                         x:Name="InhibitSwitch"
@@ -260,7 +261,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.AudioInterface}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.AudioInterfaceDescription}" />
                                         </StackPanel>
                                         <ComboBox
                                             x:Name="ApiCombo"
@@ -283,7 +283,6 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Bind h:Strings.ExclusiveMode}" />
-                                                <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.ExclusiveModeDescription}" />
                                             </StackPanel>
                                             <ToggleSwitch
                                                 x:Name="ExclusiveSwitch"
@@ -424,7 +423,6 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Bind h:Strings.DsdGain}" />
-                                                <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.DsdGainDescription}" />
                                             </StackPanel>
                                             <Slider
                                                 x:Name="GainSlider"
@@ -464,7 +462,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.FeatureMiniPlayer}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.FeatureMiniPlayerDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="MiniPlayerSwitch"
@@ -472,6 +469,35 @@
                                             AutomationProperties.Name="{x:Bind h:Strings.FeatureMiniPlayer}"
                                             Style="{StaticResource RowSwitchStyle}"
                                             Toggled="OnFeatureToggled" />
+                                    </Grid>
+                                    <!-- What the mini player shows; only with the mini player on. One
+                                         of the two notes the preferences keep (the user asked for
+                                         both): songs without lyrics show the cover in the lyrics mode. -->
+                                    <Border Style="{StaticResource SubRowDividerStyle}" />
+                                    <Grid Style="{StaticResource SubRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock x:Name="MiniPlayerModeLabel" Text="{x:Bind h:Strings.MiniPlayerMode}" />
+                                            <TextBlock
+                                                x:Name="MiniPlayerLyricsNote"
+                                                Style="{StaticResource RowDescriptionStyle}"
+                                                Text="{x:Bind h:Strings.MiniPlayerLyricsNote}"
+                                                Visibility="Collapsed" />
+                                        </StackPanel>
+                                        <ComboBox
+                                            x:Name="MiniPlayerModeCombo"
+                                            Grid.Column="1"
+                                            MinWidth="150"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind h:Strings.MiniPlayerMode}"
+                                            SelectionChanged="OnMiniPlayerModeChanged">
+                                            <ComboBoxItem Content="{x:Bind h:Strings.MiniPlayerModeCover}" />
+                                            <ComboBoxItem Content="{x:Bind h:Strings.MiniPlayerModeControls}" />
+                                            <ComboBoxItem Content="{x:Bind h:Strings.MiniPlayerModeLyrics}" />
+                                        </ComboBox>
                                     </Grid>
                                     <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                                     <Grid Style="{StaticResource RowStyle}">
@@ -481,7 +507,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.FeatureOutputButton}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.FeatureOutputButtonDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="OutputButtonSwitch"
@@ -491,14 +516,16 @@
                                             Toggled="OnFeatureToggled" />
                                     </Grid>
                                     <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                    <!-- The other note the preferences keep: without the volume control
+                                         the app plays at full volume (Player.ApplyVolume). -->
                                     <Grid Style="{StaticResource RowStyle}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
                                             <TextBlock Text="{x:Bind h:Strings.FeatureVolume}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.FeatureVolumeDescription}" />
+                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.VolumeControlNote}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="VolumeSwitch"
@@ -515,7 +542,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind h:Strings.FeatureLyrics}" />
-                                            <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.FeatureLyricsDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="LyricsSwitch"
@@ -534,10 +560,6 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock x:Name="LocalLyricsLabel" Text="{x:Bind h:Strings.LoadLocalLyrics}" />
-                                            <TextBlock
-                                                x:Name="LocalLyricsDescription"
-                                                Style="{StaticResource RowDescriptionStyle}"
-                                                Text="{x:Bind h:Strings.LoadLocalLyricsDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="LocalLyricsSwitch"
@@ -554,15 +576,50 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock x:Name="DownloadLyricsLabel" Text="{x:Bind h:Strings.DownloadLyrics}" />
-                                            <TextBlock
-                                                x:Name="DownloadLyricsDescription"
-                                                Style="{StaticResource RowDescriptionStyle}"
-                                                Text="{x:Bind h:Strings.DownloadLyricsDescription}" />
                                         </StackPanel>
                                         <ToggleSwitch
                                             x:Name="DownloadLyricsSwitch"
                                             Grid.Column="1"
                                             AutomationProperties.Name="{x:Bind h:Strings.DownloadLyrics}"
+                                            Style="{StaticResource RowSwitchStyle}"
+                                            Toggled="OnLyricsOptionToggled" />
+                                    </Grid>
+                                    <!-- Where downloads go: downloaded ones and those picked in a song's properties -->
+                                    <Border Style="{StaticResource SubRowDividerStyle}" />
+                                    <Grid Style="{StaticResource SubRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock x:Name="LyricsLocationLabel" Text="{x:Bind h:Strings.LyricsLocation}" />
+                                        </StackPanel>
+                                        <ComboBox
+                                            x:Name="LyricsLocationCombo"
+                                            Grid.Column="1"
+                                            MinWidth="150"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind h:Strings.LyricsLocation}"
+                                            SelectionChanged="OnLyricsLocationChanged">
+                                            <ComboBoxItem Content="{x:Bind h:Strings.LyricsLocationSongFolder}" />
+                                            <ComboBoxItem Content="{x:Bind h:Strings.LyricsLocationCache}" />
+                                        </ComboBox>
+                                    </Grid>
+                                    <!-- Songs LRCLIB had nothing for are remembered (in the lyrics cache) -->
+                                    <Border Style="{StaticResource SubRowDividerStyle}" />
+                                    <Grid Style="{StaticResource SubRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            x:Name="RememberMissingLyricsLabel"
+                                            VerticalAlignment="Center"
+                                            Text="{x:Bind h:Strings.RememberMissingLyrics}" />
+                                        <ToggleSwitch
+                                            x:Name="RememberMissingLyricsSwitch"
+                                            Grid.Column="1"
+                                            AutomationProperties.Name="{x:Bind h:Strings.RememberMissingLyrics}"
                                             Style="{StaticResource RowSwitchStyle}"
                                             Toggled="OnLyricsOptionToggled" />
                                     </Grid>
@@ -578,7 +635,6 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind h:Strings.ShowAudioFormat}" />
-                                        <TextBlock Style="{StaticResource RowDescriptionStyle}" Text="{x:Bind h:Strings.ShowAudioFormatDescription}" />
                                     </StackPanel>
                                     <ToggleSwitch
                                         x:Name="FormatSwitch"
@@ -628,14 +684,77 @@
                                     </ItemsControl>
                                     <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                                     <Grid Style="{StaticResource RowStyle}">
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            Style="{StaticResource RowDescriptionStyle}"
-                                            Text="{x:Bind h:Strings.MusicFoldersDescription}" />
                                         <Button
                                             HorizontalAlignment="Right"
                                             Click="OnAddFolderClick"
                                             Content="{x:Bind h:Strings.AddFolder}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Windows port: starting over in part. Each action asks first. -->
+                        <StackPanel x:Name="ResetPage" Visibility="Collapsed">
+                            <Border Style="{StaticResource GroupCardStyle}">
+                                <StackPanel>
+                                    <Grid Style="{StaticResource RowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind h:Strings.ClearLyricsCache}" />
+                                        <!-- What the cache holds, as a value -->
+                                        <TextBlock
+                                            x:Name="LyricsCacheSize"
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource SecondaryLabelStyle}"
+                                            Typography.NumeralAlignment="Tabular" />
+                                        <Button
+                                            x:Name="ClearLyricsCacheButton"
+                                            Grid.Column="2"
+                                            MinWidth="96"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind h:Strings.ClearLyricsCache}"
+                                            Click="OnClearLyricsCacheClick"
+                                            Content="{x:Bind h:Strings.Clear}" />
+                                    </Grid>
+                                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                    <Grid Style="{StaticResource RowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind h:Strings.ClearPlayCounts}" />
+                                        </StackPanel>
+                                        <Button
+                                            x:Name="ClearPlayCountsButton"
+                                            Grid.Column="1"
+                                            MinWidth="96"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind h:Strings.ClearPlayCounts}"
+                                            Click="OnClearPlayCountsClick"
+                                            Content="{x:Bind h:Strings.Clear}" />
+                                    </Grid>
+                                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                    <Grid Style="{StaticResource RowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind h:Strings.ResetSettings}" />
+                                        </StackPanel>
+                                        <Button
+                                            x:Name="ResetSettingsButton"
+                                            Grid.Column="1"
+                                            MinWidth="96"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind h:Strings.ResetSettings}"
+                                            Click="OnResetSettingsClick"
+                                            Content="{x:Bind h:Strings.ResetAction}" />
                                     </Grid>
                                 </StackPanel>
                             </Border>

@@ -234,6 +234,17 @@ public sealed class PlayQueue
             song.State = SongState.Unplayed;
     }
 
+    /// <summary>Ends the queue and drops its songs: nothing is left to play again.</summary>
+    public void Clear()
+    {
+        End();
+        _items = new();
+        _values = new();
+        _position = 0;
+        Source = null;
+        IsShuffled = false;
+    }
+
     /// <summary>
     /// Applies a repeat mode change during playback. Shuffle randomizes the songs
     /// after the current one; leaving shuffle puts them back in their original order.

@@ -61,11 +61,18 @@
                 SelectionChanged="OnPlaylistSelected"
                 SelectionMode="Single">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:UserPlaylist">
-                        <TextBlock
-                            Margin="0,8"
-                            Style="{StaticResource BodyLabelStyle}"
-                            Text="{x:Bind Title}" />
+                    <!-- The playlist's icon and title: Favorite Songs first, then the user's -->
+                    <DataTemplate x:DataType="models:Playlist">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon
+                                VerticalAlignment="Center"
+                                FontSize="16"
+                                Glyph="{x:Bind Glyph}" />
+                            <TextBlock
+                                Margin="0,8"
+                                Style="{StaticResource BodyLabelStyle}"
+                                Text="{x:Bind Title}" />
+                        </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

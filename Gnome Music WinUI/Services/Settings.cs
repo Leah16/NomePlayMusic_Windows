@@ -16,6 +16,29 @@ public enum ReplayGainMode
     Track,
 }
 
+/// <summary>Where downloaded lyrics are kept (Windows port).</summary>
+public enum LyricsLocation
+{
+    /// <summary>The .lrc file named like the song, in its folder.</summary>
+    SongFolder,
+
+    /// <summary>The app's lyrics cache, in its data folder.</summary>
+    Cache,
+}
+
+/// <summary>What the mini player shows (Windows port).</summary>
+public enum MiniPlayerMode
+{
+    /// <summary>The cover; the controls come over its blurred copy while pointed at.</summary>
+    Cover,
+
+    /// <summary>The controls, over the blurred cover, all the time.</summary>
+    Controls,
+
+    /// <summary>The lyrics, as the lyrics page shows them; the cover where there are none.</summary>
+    Lyrics,
+}
+
 public sealed class SettingsData
 {
     public int[]? WindowSize { get; set; }
@@ -42,11 +65,14 @@ public sealed class SettingsData
     // Windows port: what the player shows (null: the default, on)
     public bool ShowAudioFormat { get; set; }
     public bool? MiniPlayerEnabled { get; set; }
+    public MiniPlayerMode MiniPlayerMode { get; set; }
     public bool? OutputButtonEnabled { get; set; }
     public bool? VolumeControlEnabled { get; set; }
     public bool? LyricsEnabled { get; set; }
     public bool LoadLocalLyrics { get; set; }
     public bool DownloadLyrics { get; set; }
+    public LyricsLocation LyricsLocation { get; set; }
+    public bool RememberMissingLyrics { get; set; }
 }
 
 /// <summary>
@@ -208,6 +234,13 @@ public sealed class Settings : ObservableObject
         set => Set(() => _data.MiniPlayerEnabled = value, MiniPlayerEnabled != value);
     }
 
+    /// <summary>What the mini player shows: the cover (the default), the controls or the lyrics.</summary>
+    public MiniPlayerMode MiniPlayerMode
+    {
+        get => _data.MiniPlayerMode;
+        set => Set(() => _data.MiniPlayerMode = value, _data.MiniPlayerMode != value);
+    }
+
     /// <summary>The player bar's button for the audio interface, the device and exclusive mode.</summary>
     public bool OutputButtonEnabled
     {
@@ -231,7 +264,8 @@ public sealed class Settings : ObservableObject
 
     /// <summary>
     /// Lyrics come from the song's lyrics file first (the LRC file with its name in its
-    /// folder), from LRCLIB only without one (off by default: always LRCLIB).
+    /// folder), then from the lyrics cache, from LRCLIB only without either (off by
+    /// default: always LRCLIB).
     /// </summary>
     public bool LoadLocalLyrics
     {
@@ -239,11 +273,77 @@ public sealed class Settings : ObservableObject
         set => Set(() => _data.LoadLocalLyrics = value, _data.LoadLocalLyrics != value);
     }
 
-    /// <summary>Lyrics found on LRCLIB are kept as the song's lyrics file, when it has none (off by default).</summary>
+    /// <summary>Lyrics found on LRCLIB are kept where <see cref="LyricsLocation"/> says, when there are none (off by default).</summary>
     public bool DownloadLyrics
     {
         get => _data.DownloadLyrics;
         set => Set(() => _data.DownloadLyrics = value, _data.DownloadLyrics != value);
+    }
+
+    /// <summary>Where downloaded lyrics go: the song's folder (the default) or the app's lyrics cache.</summary>
+    public LyricsLocation LyricsLocation
+    {
+        get => _data.LyricsLocation;
+        set => Set(() => _data.LyricsLocation = value, _data.LyricsLocation != value);
+    }
+
+    /// <summary>
+    /// Songs LRCLIB had no lyrics for are remembered (in the lyrics cache) and not looked
+    /// up again: without local lyrics they show none at once (off by default).
+    /// </summary>
+    public bool RememberMissingLyrics
+    {
+        get => _data.RememberMissingLyrics;
+        set => Set(() => _data.RememberMissingLyrics = value, _data.RememberMissingLyrics != value);
+    }
+
+    /// <summary>
+    /// Every preference back to its default (Preferences → Reset). The music folders and
+    /// the window's size stay. Only what changes is announced, so a song playing keeps
+    /// its output unless that changed.
+    /// </summary>
+    public void ResetToDefaults()
+    {
+        var output = OutputSettings;
+        var changed = new List<string>();
+        void Reset(string name, bool isDefault, Action reset)
+        {
+            if (isDefault)
+                return;
+            reset();
+            changed.Add(name);
+        }
+
+        Reset(nameof(Repeat), _data.Repeat == default, () => _data.Repeat = default);
+        Reset(nameof(ReplayGain), _data.ReplayGain == default, () => _data.ReplayGain = default);
+        Reset(nameof(InhibitSuspend), !_data.InhibitSuspend, () => _data.InhibitSuspend = false);
+        Reset(nameof(OutputApi), _data.OutputApi == default, () => _data.OutputApi = default);
+        bool devices = _data.WasapiDevice is not null || _data.DirectSoundDevice is not null || _data.AsioDevice is not null;
+        _data.WasapiDevice = _data.DirectSoundDevice = _data.AsioDevice = null;
+        Reset(nameof(WasapiExclusive), !_data.WasapiExclusive, () => _data.WasapiExclusive = false);
+        Reset(nameof(DsdMode), _data.DsdMode == default, () => _data.DsdMode = default);
+        Reset(nameof(DsdGainDb), _data.DsdGainDb == 0, () => _data.DsdGainDb = 0);
+        Reset(nameof(PhaseInvert), !_data.PhaseInvert, () => _data.PhaseInvert = false);
+        Reset(nameof(MonoOutput), !_data.MonoOutput, () => _data.MonoOutput = false);
+        Reset(nameof(SwapChannels), !_data.SwapChannels, () => _data.SwapChannels = false);
+        Reset(nameof(ShowAudioFormat), !_data.ShowAudioFormat, () => _data.ShowAudioFormat = false);
+        Reset(nameof(MiniPlayerEnabled), _data.MiniPlayerEnabled is null or true, () => _data.MiniPlayerEnabled = null);
+        Reset(nameof(MiniPlayerMode), _data.MiniPlayerMode == default, () => _data.MiniPlayerMode = default);
+        Reset(nameof(OutputButtonEnabled), _data.OutputButtonEnabled is null or true, () => _data.OutputButtonEnabled = null);
+        Reset(nameof(VolumeControlEnabled), _data.VolumeControlEnabled is null or true, () => _data.VolumeControlEnabled = null);
+        Reset(nameof(LyricsEnabled), _data.LyricsEnabled is null or true, () => _data.LyricsEnabled = null);
+        Reset(nameof(LoadLocalLyrics), !_data.LoadLocalLyrics, () => _data.LoadLocalLyrics = false);
+        Reset(nameof(DownloadLyrics), !_data.DownloadLyrics, () => _data.DownloadLyrics = false);
+        Reset(nameof(LyricsLocation), _data.LyricsLocation == default, () => _data.LyricsLocation = default);
+        Reset(nameof(RememberMissingLyrics), !_data.RememberMissingLyrics, () => _data.RememberMissingLyrics = false);
+
+        // The output reopens only if what it plays through changed.
+        if (OutputSettings != output)
+            changed.Add(nameof(OutputSettings));
+        foreach (var name in changed)
+            OnPropertyChanged(name);
+        if (changed.Count > 0 || devices)
+            _saver.Schedule();
     }
 
     public static IReadOnlyList<string> DefaultLibraryFolders()

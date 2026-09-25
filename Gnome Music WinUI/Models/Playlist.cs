@@ -38,7 +38,11 @@ public abstract class Playlist : ObservableObject
     /// <summary>ngettext("{} Song", "{} Songs", count) (playlistcontrols.py).</summary>
     public string CountText => Strings.SongCount(Songs.Count);
 
-    public abstract bool IsSmart { get; }
+    /// <summary>One of the app's playlists (Favorite Songs, Recently Played): not renamed or deleted.</summary>
+    public abstract bool IsSystem { get; }
+
+    /// <summary>Songs can be added, removed and put in another order (all but Recently Played).</summary>
+    public virtual bool IsEditable => true;
 
     /// <summary>The playlist icon (icon_name).</summary>
     public abstract string Glyph { get; }
@@ -77,46 +81,43 @@ public sealed class UserPlaylist : Playlist
     {
     }
 
-    public override bool IsSmart => false;
+    public override bool IsSystem => false;
 
     public override string Glyph => "";
 }
 
 /// <summary>
-/// An automatically generated playlist (grilowrappers/smartplaylist.py); its
-/// content is computed from the library by <see cref="Query"/>.
+/// Favorite Songs (GNOME Music's "Starred Songs" smart playlist, a list of its own in
+/// the port): the starred songs, in the order the user gives them. Starring a song puts
+/// it at the top, unstarring takes it out; its songs can be dragged into another order.
 /// </summary>
-public sealed class SmartPlaylist : Playlist
+public sealed class FavoritesPlaylist : Playlist
 {
-    /// <summary>Segoe Fluent Icons stand-ins for the smart playlist icons.</summary>
-    public static class Glyphs
+    public FavoritesPlaylist(string title)
+        : base("FAVORITES", title, DateTime.MinValue)
     {
-        public const string MostPlayed = "";          // audio-speakers-symbolic
-        public const string NeverPlayed = "";         // deaf-symbolic
-        public const string RecentlyPlayed = "";      // document-open-recent-symbolic
-        public const string RecentlyAdded = "";       // list-add-symbolic
-        public const string Favorites = "";           // starred-symbolic
-        public const string InsufficientTagged = "";  // question-round-symbolic
     }
 
-    private readonly string _glyph;
+    public override bool IsSystem => true;
 
-    public SmartPlaylist(string tag, string title, string glyph, Func<IEnumerable<CoreSong>, IEnumerable<CoreSong>> query)
-        : base(tag, title, DateTime.MinValue)
+    public override string Glyph => "";   // starred-symbolic
+}
+
+/// <summary>
+/// Recently Played (GNOME Music's smart playlist, a history in the port): the songs
+/// played last, the latest at the top; each song that starts playing moves there. It
+/// cannot be edited.
+/// </summary>
+public sealed class HistoryPlaylist : Playlist
+{
+    public HistoryPlaylist(string title)
+        : base("RECENTLY_PLAYED", title, DateTime.MinValue)
     {
-        Tag = tag;
-        _glyph = glyph;
-        Query = query;
     }
 
-    /// <summary>tag_text, e.g. "MOST_PLAYED".</summary>
-    public string Tag { get; }
+    public override bool IsSystem => true;
 
-    public Func<IEnumerable<CoreSong>, IEnumerable<CoreSong>> Query { get; }
+    public override bool IsEditable => false;
 
-    public override bool IsSmart => true;
-
-    public override string Glyph => _glyph;
-
-    public void Refresh(IEnumerable<CoreSong> library) => SetSongs(Query(library).ToList());
+    public override string Glyph => "";   // document-open-recent-symbolic
 }

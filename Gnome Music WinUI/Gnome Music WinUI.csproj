@@ -17,6 +17,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <!-- The app's version, shown in About when unpackaged; the package has it too
+         (Package.appxmanifest, x.y.z.0). A release tag vX.Y.Z sets it in CI. -->
+    <VersionPrefix>1.0.1</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>

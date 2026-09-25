@@ -42,20 +42,16 @@
             <Vector3Transition />
         </Grid.TranslationTransition>
 
-        <!-- Over the lyrics, the edge between their white page and the bar; it comes and
-             goes with the page -->
+        <!-- A clear line between the bar and whatever is above it, on every page and over
+             the lyrics: the bar and the sidebars share the window's base, and the content
+             layers are barely lighter -->
         <Border
-            x:Name="LyricsEdge"
+            x:Name="TopEdge"
             Margin="-6,-7,-6,0"
             VerticalAlignment="Top"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0"
-            IsHitTestVisible="False"
-            Opacity="0">
-            <Border.OpacityTransition>
-                <ScalarTransition />
-            </Border.OpacityTransition>
-        </Border>
+            IsHitTestVisible="False" />
 
         <!-- start: _song_info_box. Unlike GNOME Music, it is a button that shows and
              hides the lyrics. -->
@@ -89,7 +85,7 @@
                     Size="74" />
                 <StackPanel
                     x:Name="Labels"
-                    MaxWidth="220"
+                    MaxWidth="200"
                     VerticalAlignment="Center"
                     Spacing="3">
                     <TextBlock x:Name="TitleText" Style="{StaticResource StrongLabelStyle}" />

@@ -2,6 +2,8 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Gnome_Music_WinUI.Controls;
 using Gnome_Music_WinUI.Helpers;
 using Gnome_Music_WinUI.Models;
@@ -22,8 +24,14 @@ namespace Gnome_Music_WinUI;
 /// window on top of the others, without a title bar, filled with the cover. Pointing
 /// at it shows previous, play/pause and next, the song and "Back to Full View" over a
 /// blurred, dimmed copy of the cover; a thin bar along the bottom edge shows the
-/// progress. Dragging it anywhere moves it. <see cref="MainWindow"/> hides itself
-/// while the mini player is open and comes back when it closes.
+/// progress. Dragging it anywhere moves it; its edges and corners resize it, always
+/// as a square, and below 240 px the song's title and artist hide. What it shows is a
+/// setting (<see cref="MiniPlayerMode"/>): the cover as above, the controls over the
+/// blurred cover all the time, or the song's lyrics on white as the lyrics page shows
+/// them, without the progress bar; pointed at, the lyrics themselves blur and darken
+/// under the controls (the cover takes their place for songs without lyrics).
+/// <see cref="MainWindow"/> hides itself while the mini player is open and comes back
+/// when it closes.
 /// </summary>
 public sealed partial class MiniPlayerWindow : Window
 {
@@ -31,16 +39,28 @@ public sealed partial class MiniPlayerWindow : Window
     private const int MinimumSize = 200;
     private const int ScreenMargin = 24;
 
+    /// <summary>Below this size the song's title and artist would run into the buttons: they hide.</summary>
+    private const double SongLabelsMinSize = 240;
+
+    /// <summary>The picture of the lyrics that is blurred under the controls, in pixels each way.</summary>
+    private const int LyricsBlurSize = 64;
+
     /// <summary>Where the mini player was when it last closed, for this session.</summary>
     private static (PointInt32 Position, SizeInt32 ClientSize)? _lastPlacement;
 
     private readonly Player _player = App.Services.Player;
+    private readonly Settings _settings = App.Services.Settings;
     private readonly IntPtr _hwnd;
     private readonly DispatcherQueueTimer _hoverTimer;
+    private readonly DispatcherQueueTimer _lyricsBlurTimer;
     private CoreSong? _song;
     private int _artId;
     private bool _pointerOver;
     private bool _keyboardFocus;
+    private bool _showsLyrics;
+    private bool _blurringLyrics;
+    private bool _lyricsBlurFailed;
+    private byte[]? _lyricsPixels;
     private bool _closed;
     private (PointInt32 Cursor, PointInt32 Window)? _dragStart;
 
@@ -54,20 +74,26 @@ public sealed partial class MiniPlayerWindow : Window
         _hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         Placeholder.Glyph = CoverArt.AlbumGlyph;
 
-        if (AppWindow.Presenter is OverlappedPresenter presenter)
+        var presenter = AppWindow.Presenter as OverlappedPresenter;
+        if (presenter is not null)
         {
             presenter.IsAlwaysOnTop = true;
             presenter.IsMaximizable = false;
             presenter.IsMinimizable = false;
-            presenter.PreferredMinimumWidth = (int)(MinimumSize * scale);
-            presenter.PreferredMinimumHeight = (int)(MinimumSize * scale);
             presenter.SetBorderAndTitleBar(true, false);
         }
 
         // AppWindow.ResizeClient counts a title bar this window does not have, so the
-        // size comes from the frame the window actually has.
+        // size comes from the frame the window actually has. The frame is wider than it
+        // is high: the smallest window has a square client inside it.
         int frameWidth = AppWindow.Size.Width - AppWindow.ClientSize.Width;
         int frameHeight = AppWindow.Size.Height - AppWindow.ClientSize.Height;
+        if (presenter is not null)
+        {
+            presenter.PreferredMinimumWidth = (int)(MinimumSize * scale) + frameWidth;
+            presenter.PreferredMinimumHeight = (int)(MinimumSize * scale) + frameHeight;
+        }
+
         int size = (int)(Size * scale);
         var client = _lastPlacement?.ClientSize ?? new SizeInt32(size, size);
         AppWindow.Resize(new SizeInt32(client.Width + frameWidth, client.Height + frameHeight));
@@ -91,16 +117,33 @@ public sealed partial class MiniPlayerWindow : Window
             if (!_closed && (args.DidPositionChange || args.DidSizeChange))
                 _lastPlacement = (AppWindow.Position, AppWindow.ClientSize);
         };
+
+        // It resizes as a square, and a small one shows only the buttons over the cover.
+        SquareWindow.Attach(_hwnd);
+        RootGrid.SizeChanged += (_, e) =>
+            SongLabels.Visibility = Math.Min(e.NewSize.Width, e.NewSize.Height) >= SongLabelsMinSize ? Visibility.Visible : Visibility.Collapsed;
         _hoverTimer = DispatcherQueue.CreateTimer();
         _hoverTimer.Interval = TimeSpan.FromMilliseconds(250);
         _hoverTimer.Tick += (_, _) => SetPointerOver(IsPointerOverWindow());
+        _lyricsBlurTimer = DispatcherQueue.CreateTimer();
+        _lyricsBlurTimer.Interval = TimeSpan.FromMilliseconds(200);
+        _lyricsBlurTimer.Tick += (_, _) => BlurLyrics();
 
         _player.PropertyChanged += OnPlayerPropertyChanged;
+        _settings.PropertyChanged += OnSettingsPropertyChanged;
+        MiniLyrics.HasLyricsChanged += (_, _) => UpdateMode();
+
+        // The mini player has the taskbar button while the full view is hidden: the same
+        // buttons under its thumbnail (they go with the window).
+        _ = new TaskbarButtons(_hwnd, _player);
         Closed += (_, _) =>
         {
             _closed = true;
             _hoverTimer.Stop();
+            _lyricsBlurTimer.Stop();
             _player.PropertyChanged -= OnPlayerPropertyChanged;
+            _settings.PropertyChanged -= OnSettingsPropertyChanged;
+            MiniLyrics.Close();
         };
 
         // The controls also show while the keyboard is in them.
@@ -120,6 +163,40 @@ public sealed partial class MiniPlayerWindow : Window
 
         UpdateSong();
         UpdateState();
+        UpdateMode();
+    }
+
+    private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(Settings.MiniPlayerMode) or nameof(Settings.LyricsEnabled))
+            UpdateMode();
+    }
+
+    /// <summary>
+    /// Shows what the mode asks for. In the lyrics mode the lyrics layer shows once the
+    /// song's lyrics are there; while they load, and for instrumentals, songs without
+    /// lyrics or with the lyrics turned off, it is the cover mode.
+    /// </summary>
+    private void UpdateMode()
+    {
+        if (_closed)
+            return;
+
+        bool lyricsMode = _settings.MiniPlayerMode == MiniPlayerMode.Lyrics && _settings.LyricsEnabled;
+        if (lyricsMode)
+            MiniLyrics.Open();
+        else
+            MiniLyrics.Close();
+
+        // Over the lyrics the controls lie on the lyrics blurred, not on the cover, and the
+        // white page takes a darker veil: white on it keeps a contrast of 5.7:1.
+        _showsLyrics = lyricsMode && MiniLyrics.HasLyrics;
+        LyricsLayer.Opacity = _showsLyrics ? 1 : 0;
+        BlurImage.Visibility = _showsLyrics ? Visibility.Collapsed : Visibility.Visible;
+        LyricsBlurImage.Visibility = _showsLyrics ? Visibility.Visible : Visibility.Collapsed;
+        Veil.Opacity = _showsLyrics ? 0.6 : 0.4;
+        ProgressLine.Visibility = _showsLyrics ? Visibility.Collapsed : Visibility.Visible;
+        UpdateOverlay();
     }
 
     private void OnPlayerPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -211,10 +288,73 @@ public sealed partial class MiniPlayerWindow : Window
             BlurImage.Source = source;
     }
 
+    /// <summary>The controls: while pointed at or in the keyboard's hands, all the time in the controls mode.</summary>
     private void UpdateOverlay()
     {
-        if (!_closed)
-            Overlay.Opacity = _pointerOver || _keyboardFocus ? 1 : 0;
+        if (_closed)
+            return;
+
+        bool always = _settings.MiniPlayerMode == MiniPlayerMode.Controls;
+        bool shown = always || _pointerOver || _keyboardFocus;
+        Overlay.Opacity = shown ? 1 : 0;
+        if (!shown || !_showsLyrics)
+        {
+            _lyricsBlurTimer.Stop();
+            _lyricsBlurFailed = false;
+        }
+        else if (!_lyricsBlurTimer.IsRunning && !_lyricsBlurFailed)
+        {
+            BlurLyrics();
+            _lyricsBlurTimer.Start();
+        }
+    }
+
+    /// <summary>
+    /// The lyrics blurred under the controls: a small picture of the lyrics layer,
+    /// box-blurred like the cover, taken again five times a second while the controls
+    /// show, so that it follows the lines. (In-app acrylic would blur them live, but it
+    /// draws nothing in a Remote Desktop session: the white glyphs were left on white.)
+    /// </summary>
+    private async void BlurLyrics()
+    {
+        if (_blurringLyrics)
+            return;
+
+        _blurringLyrics = true;
+        try
+        {
+            var picture = new RenderTargetBitmap();
+            await picture.RenderAsync(LyricsLayer, LyricsBlurSize, LyricsBlurSize);
+            byte[] pixels = (await picture.GetPixelsAsync()).ToArray();
+            int width = picture.PixelWidth, height = picture.PixelHeight;
+            if (_closed || !_showsLyrics || width == 0 || pixels.Length != width * height * 4
+                || _lyricsPixels is { } last && pixels.AsSpan().SequenceEqual(last))
+            {
+                return;   // nothing new
+            }
+
+            _lyricsPixels = pixels;
+            byte[] copy = (byte[])pixels.Clone();
+            int radius = Math.Max(1, width / 20);
+            var blurred = await Task.Run(() => CoverBlur.Blur(copy, width, height, radius));
+            var source = new SoftwareBitmapSource();
+            await source.SetBitmapAsync(blurred);
+            if (!_closed)
+                LyricsBlurImage.Source = source;
+        }
+        catch (Exception ex)
+        {
+            // Not again until the controls show the next time. (A picture under way when
+            // the window closes fails too: nothing to say then.)
+            _lyricsBlurFailed = true;
+            _lyricsBlurTimer.Stop();
+            if (!_closed)
+                Log.Warning($"Cannot blur the lyrics in the mini player: {ex.Message}");
+        }
+        finally
+        {
+            _blurringLyrics = false;
+        }
     }
 
     private void OnRootPointerEntered(object sender, PointerRoutedEventArgs e)

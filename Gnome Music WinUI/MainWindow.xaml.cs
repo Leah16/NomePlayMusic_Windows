@@ -45,6 +45,10 @@ public sealed partial class MainWindow : Window
     /// <summary>…or this long after it left the window.</summary>
     private static readonly TimeSpan ControlsLeaveTime = TimeSpan.FromMilliseconds(500);
 
+    /// <summary>The lyrics' back button fades as the player bar does (PlayerToolbar.SetAway).</summary>
+    private static readonly TimeSpan ControlsAwayFade = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan ControlsBackFade = TimeSpan.FromMilliseconds(150);
+
     private readonly AppServices _services = App.Services;
     private readonly IntPtr _hwnd;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _pointerTimer;
@@ -119,6 +123,10 @@ public sealed partial class MainWindow : Window
         _services.Player.NoPlaybackDevice += (_, _) => ShowToast(new Toast(Strings.NoPlaybackDevice));
         Services.Audio.AsioThread.WindowHandle = _hwnd;
 
+        // Previous, play/pause and next under the window's thumbnail in the taskbar (they
+        // live as long as the window).
+        _ = new TaskbarButtons(_hwnd, _services.Player);
+
         // The lyrics go when the player stops; over them, pausing brings the controls back.
         // Back in the window, maybe from editing the lyrics file, they are checked again.
         Lyrics.Opened += OnLyricsOpened;
@@ -135,6 +143,17 @@ public sealed partial class MainWindow : Window
                 UpdateLyricsControls();
         };
 
+        // Without music there is nothing to search, and a pushed page shows songs that are
+        // gone: the status page comes back.
+        _services.Model.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(CoreModel.SongsAvailable) && !_services.Model.SongsAvailable)
+            {
+                SetSearchMode(false);
+                PopToRoot();
+            }
+        };
+
         // Over the lyrics, the player bar covers their bottom, and it and the caption
         // buttons step aside while the pointer rests (UpdateLyricsControls).
         PlayerBar.SizeChanged += (_, _) => Lyrics.BottomInset = PlayerBar.ActualHeight;
@@ -147,8 +166,9 @@ public sealed partial class MainWindow : Window
                 UpdateLyricsControls();
         }), true);
 
-        // The keyboard coming into the bar brings it back too, like a move of the pointer.
-        PlayerBar.GettingFocus += (_, e) =>
+        // The keyboard coming into the bar, or to the lyrics' back button, brings them back
+        // too, like a move of the pointer.
+        TypedEventHandler<UIElement, GettingFocusEventArgs> keyboardBack = (_, e) =>
         {
             if (_lyricsOpen && e.FocusState == FocusState.Keyboard)
             {
@@ -156,6 +176,8 @@ public sealed partial class MainWindow : Window
                 SetControlsAway(false);
             }
         };
+        PlayerBar.GettingFocus += keyboardBack;
+        LyricsBackButton.GettingFocus += keyboardBack;
 
         // Lists handle typed characters for their own type-ahead; search wins.
         RootGrid.AddHandler(UIElement.CharacterReceivedEvent,
@@ -216,6 +238,7 @@ public sealed partial class MainWindow : Window
             if (IsFocusWithin(AppTitleBar))
                 PlayerBar.FocusSongInfo();
             Lyrics.Open();
+            LyricsBackButton.Visibility = Visibility.Visible;
             WatchPointer(true);
         }
         else
@@ -223,15 +246,19 @@ public sealed partial class MainWindow : Window
             // The controls come back first: the title bar lays out around the caption buttons.
             WatchPointer(false);
 
-            // The content shows again under the lyrics as they go.
+            // The content shows again under the lyrics as they go; the title bar's own back
+            // button takes the place of theirs.
             NavFrame.Visibility = Visibility.Visible;
-            if (IsFocusWithin(Lyrics))
+            if (IsFocusWithin(Lyrics) || IsFocusWithin(LyricsBackButton))
                 PlayerBar.FocusSongInfo();
+            LyricsBackButton.Visibility = Visibility.Collapsed;
             Lyrics.Close();
         }
 
         UpdateHeader();
     }
+
+    private void OnLyricsBackClick(object sender, RoutedEventArgs e) => SetLyricsOpen(false);
 
     /// <summary>Once the lyrics cover it, the content is hidden: nothing under them takes the focus.</summary>
     private void OnLyricsOpened(object? sender, EventArgs e)
@@ -303,7 +330,7 @@ public sealed partial class MainWindow : Window
             && playing && !(over && IsOverControls(pointer)) && !IsFlyoutOpen());
     }
 
-    /// <summary>Whether the pointer is on the player bar or the caption buttons.</summary>
+    /// <summary>Whether the pointer is on the player bar, the caption buttons or the lyrics' back button.</summary>
     private bool IsOverControls(POINT pointer)
     {
         if (!ScreenToClient(_hwnd, ref pointer) || Content.XamlRoot is not { } root)
@@ -313,11 +340,13 @@ public sealed partial class MainWindow : Window
         var at = new Windows.Foundation.Point(pointer.X / scale, pointer.Y / scale);
         var bar = PlayerBar.TransformToVisual(null).TransformBounds(
             new Windows.Foundation.Rect(0, 0, PlayerBar.ActualWidth, PlayerBar.ActualHeight));
+        var back = LyricsBackButton.TransformToVisual(null).TransformBounds(
+            new Windows.Foundation.Rect(0, 0, LyricsBackButton.ActualWidth, LyricsBackButton.ActualHeight));
         if (AppWindow.TitleBar.RightInset > 0)
             _captionWidth = AppWindow.TitleBar.RightInset / scale;
         var caption = new Windows.Foundation.Rect(
             RootGrid.ActualWidth - _captionWidth, 0, _captionWidth, AppTitleBar.ActualHeight);
-        return bar.Contains(at) || caption.Contains(at);
+        return bar.Contains(at) || caption.Contains(at) || back.Contains(at);
     }
 
     /// <summary>Whether a flyout is open: the play queue, the volume, the repeat modes (tooltips aside).</summary>
@@ -350,6 +379,13 @@ public sealed partial class MainWindow : Window
 
         PlayerBar.SetAway(away);
         AppWindow.TitleBar.PreferredHeightOption = away ? TitleBarHeightOption.Collapsed : TitleBarHeightOption.Tall;
+
+        // The lyrics' back button fades with the bar; away, it takes no clicks, and its
+        // place drags the window again.
+        LyricsBackButton.OpacityTransition.Duration = away ? ControlsAwayFade : ControlsBackFade;
+        LyricsBackButton.Opacity = away ? 0 : 1;
+        LyricsBackButton.IsHitTestVisible = !away;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, UpdateTitleBarLayout);
     }
 
     /// <summary>Whether the pointer is over this window or a popup of it, rather than over another window in front.</summary>
@@ -395,7 +431,8 @@ public sealed partial class MainWindow : Window
     /// win.navigate_back, made global (the title bar's back button, Alt+← and the mouse's
     /// back button): a pushed page goes; else search closes; else the view shown before
     /// comes back (the albums, artists, playlists and preferences, in the order they were
-    /// shown). False when there is nowhere to go back to.
+    /// shown), but not from the status page: without music those views show it too.
+    /// False when there is nowhere to go back to.
     /// </summary>
     public bool GoBack()
     {
@@ -412,6 +449,9 @@ public sealed partial class MainWindow : Window
             SetSearchMode(false);
             return true;
         }
+
+        if (_mainPage?.ShowsStatus == true)
+            return false;
 
         while (_viewHistory.Count > 0)
         {
@@ -442,7 +482,7 @@ public sealed partial class MainWindow : Window
     /// <summary>Whether <see cref="GoBack"/> goes anywhere.</summary>
     private bool CanGoBack =>
         NavFrame.CanGoBack || _searchMode
-        || _viewHistory.Any(view => view != _mainPage?.CurrentView);
+        || _mainPage?.ShowsStatus != true && _viewHistory.Any(view => view != _mainPage?.CurrentView);
 
     /// <summary>
     /// Shows a view of the switcher, or the preferences; search and pushed pages close.
@@ -540,9 +580,9 @@ public sealed partial class MainWindow : Window
         SearchEntryBorder.Width = Math.Min(500, TitleContent.MaxWidth);
 
         var rects = new System.Collections.Generic.List<RectInt32>();
-        foreach (FrameworkElement element in new FrameworkElement[] { BackButton, SearchButton, ViewSwitcher, SearchEntryBorder, PreferencesSwitcher })
+        foreach (FrameworkElement element in new FrameworkElement[] { BackButton, SearchButton, ViewSwitcher, SearchEntryBorder, PreferencesSwitcher, LyricsBackButton })
         {
-            if (element.Visibility != Visibility.Visible || element.ActualWidth <= 0)
+            if (element.Visibility != Visibility.Visible || !element.IsHitTestVisible || element.ActualWidth <= 0)
                 continue;
 
             var bounds = element.TransformToVisual(null).TransformBounds(new Windows.Foundation.Rect(0, 0, element.ActualWidth, element.ActualHeight));
@@ -594,12 +634,14 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Shows the preferences from a shortcut, from anywhere (search and pushed pages
-    /// close), at a category if given ("shortcuts" for Ctrl+?), with the keyboard focus on
-    /// the category.
+    /// Shows the preferences from a shortcut or a song's properties, from anywhere (the
+    /// lyrics, search and pushed pages close), at a category if given ("shortcuts" for
+    /// Ctrl+?), with the keyboard focus on the category.
     /// </summary>
     public void ShowPreferences(string? category = null)
     {
+        if (_lyricsOpen)
+            SetLyricsOpen(false);
         if (PreferencesSwitcher.SelectedItem != PreferencesItem)
             PreferencesSwitcher.SelectedItem = PreferencesItem;   // SwitchView: search and pushed pages close
         else if (_searchMode)
@@ -613,23 +655,22 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Header states: MAIN (view switcher), EMPTY (status page) and SEARCH (entry), on
-    /// pushed pages too: a page keeps the header of the view it was pushed in, with that
-    /// view selected (GNOME's pushed pages show a back button only). The back button is
-    /// always there, disabled when there is nowhere to go back to. Unlike GNOME's search
-    /// header bar, search keeps the preferences (the primary menu's place), so the search
-    /// button stays in place. Under the lyrics the title bar has no buttons: nothing
-    /// there can be clicked.
+    /// Header states: MAIN (view switcher), EMPTY (no music: the status page, or the
+    /// preferences over it) and SEARCH (entry), on pushed pages too: a page keeps the
+    /// header of the view it was pushed in, with that view selected (GNOME's pushed pages
+    /// show a back button only). Without music only the preferences button is there. The
+    /// back button shows while it leads somewhere, never on the status page. Unlike
+    /// GNOME's search header bar, search keeps the preferences (the primary menu's
+    /// place), so the search button stays in place. Under the lyrics the title bar has
+    /// no buttons: nothing there can be clicked.
     /// </summary>
     private void UpdateHeader()
     {
         var state = _mainPage?.HeaderState ?? HeaderState.Main;
         bool header = !_lyricsOpen;
 
-        BackButton.Visibility = Show(header);
-        BackButton.IsEnabled = CanGoBack;
-        SearchButton.Visibility = Show(header);
-        SearchButton.IsEnabled = state != HeaderState.Empty;
+        BackButton.Visibility = Show(header && CanGoBack);
+        SearchButton.Visibility = Show(header && state != HeaderState.Empty);
         SearchButton.IsChecked = _searchMode;
         PreferencesSwitcher.Visibility = Show(header);
 
@@ -792,6 +833,9 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    /// <summary>A song's properties (not in GNOME Music): from its menu, or from the lyrics' menu at their lyrics page.</summary>
+    public async void ShowSongProperties(CoreSong song, bool lyrics = false) =>
+        await ShowDialogAsync(new Dialogs.SongPropertiesDialog(song, lyrics));
 
     // ------------------------------------------------------------------
     // Keyboard shortcuts (application.py / window.py actions)

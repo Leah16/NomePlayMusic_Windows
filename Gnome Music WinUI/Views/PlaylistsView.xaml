@@ -13,12 +13,13 @@
         <DataTemplate x:Key="PlaylistTemplate" x:DataType="models:Playlist">
             <controls:PlaylistTile Playlist="{x:Bind}" />
         </DataTemplate>
-        <!-- Separator between smart and user playlists (2 px, margins 16) -->
+        <!-- Separator between the app's playlists and the user's: a clear line, like the
+             one above the player bar -->
         <DataTemplate x:Key="SeparatorTemplate" x:DataType="views:SidebarSeparator">
             <Border
-                Height="2"
-                Margin="8,4"
-                Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                Height="1"
+                Margin="4,6"
+                Background="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
         </DataTemplate>
         <views:SidebarTemplateSelector
             x:Key="SidebarSelector"
@@ -33,17 +34,50 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- The sidebar stays on the window's base -->
-        <ListView
-            x:Name="PlaylistsList"
-            Padding="6,6,6,4"
-            AutomationProperties.Name="{x:Bind h:Strings.Playlists}"
-            Background="Transparent"
-            ContainerContentChanging="OnContainerContentChanging"
-            ItemContainerStyle="{StaticResource SidebarItemStyle}"
-            ItemTemplateSelector="{StaticResource SidebarSelector}"
-            SelectionChanged="OnSelectionChanged"
-            SelectionMode="Single" />
+        <!-- The sidebar stays on the window's base: Favorite Songs and Recently Played, a
+             line, the user's playlists; creating one at its foot -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ListView
+                x:Name="PlaylistsList"
+                Padding="6,6,6,4"
+                AutomationProperties.Name="{x:Bind h:Strings.Playlists}"
+                Background="Transparent"
+                ContainerContentChanging="OnContainerContentChanging"
+                ItemContainerStyle="{StaticResource SidebarItemStyle}"
+                ItemTemplateSelector="{StaticResource SidebarSelector}"
+                SelectionChanged="OnSelectionChanged"
+                SelectionMode="Single" />
+            <!-- Laid out like a playlist of the list above -->
+            <Button
+                x:Name="NewPlaylistButton"
+                Grid.Row="1"
+                Margin="6,0,6,6"
+                Padding="8,8"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                AutomationProperties.Name="{x:Bind h:Strings.NewPlaylistEllipsis}"
+                Click="OnNewPlaylistClick"
+                Style="{StaticResource SubtleButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border
+                        Width="36"
+                        Height="36"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                        <FontIcon FontSize="16" Glyph="&#xE710;" />
+                    </Border>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyLabelStyle}"
+                        Text="{x:Bind h:Strings.NewPlaylistEllipsis}" />
+                </StackPanel>
+            </Button>
+        </Grid>
 
         <Border Grid.Column="1" Style="{StaticResource SplitContentLayerStyle}">
             <controls:PlaylistsWidget x:Name="PlaylistPane" />

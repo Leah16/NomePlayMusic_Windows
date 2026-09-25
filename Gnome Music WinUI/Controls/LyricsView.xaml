@@ -70,6 +70,16 @@
          of the window. The lines keep the current one a little above the middle; played
          lines are faint, the current one is in full color. -->
     <Grid x:Name="Surface" Background="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}">
+        <!-- Right-click (or the menu key): the song's lyrics in its properties -->
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Click="OnManageLyricsClick" Text="{x:Bind h:Strings.ManageLyrics}">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE90B;" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </Grid.ContextFlyout>
         <ScrollViewer
             x:Name="Scroller"
             AutomationProperties.Name="{x:Bind h:Strings.Lyrics}"
@@ -99,11 +109,17 @@
                     Foreground="{ThemeResource NowPlayingBrush}"
                     IsActive="False"
                     Visibility="Collapsed" />
-                <!-- Tab enters the lines once; the arrow keys move between them -->
+                <!-- Tab enters the lines once; the arrow keys move between them. They
+                     follow the view to the next line with an animation of their own
+                     (LinesTranslate); in the compact view they move instead of scrolling. -->
                 <StackPanel
                     x:Name="LinesPanel"
                     TabFocusNavigation="Once"
-                    XYFocusKeyboardNavigation="Enabled" />
+                    XYFocusKeyboardNavigation="Enabled">
+                    <StackPanel.RenderTransform>
+                        <TranslateTransform x:Name="LinesTranslate" />
+                    </StackPanel.RenderTransform>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

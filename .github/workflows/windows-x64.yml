@@ -35,13 +35,15 @@ jobs:
           dotnet-version: 10.0.x
 
       # A tag v1.2.3 or the version given by hand is released; other builds keep the
-      # project's version with the run number after it.
+      # project's version (VersionPrefix in the .csproj) with the run number after it.
       - name: Version
         id: version
         shell: pwsh
         env:
           INPUT_VERSION: ${{ inputs.version }}
         run: |
+          $project = ([xml](Get-Content 'Gnome Music WinUI/Gnome Music WinUI.csproj')).Project.PropertyGroup.VersionPrefix |
+            Where-Object { $_ } | Select-Object -First 1
           $release = ''
           if ($env:GITHUB_REF_TYPE -eq 'tag') { $release = $env:GITHUB_REF_NAME }
           elseif ($env:INPUT_VERSION) { $release = $env:INPUT_VERSION.Trim() }
@@ -50,14 +52,17 @@ jobs:
             throw "The version must look like 1.2.3, not '$release'."
           }
           if ($release) {
+            if ($release -ne $project) {
+              "::warning::Releasing $release, but the project's version is $project (the .csproj and Package.appxmanifest)."
+            }
             "prefix=$release" >> $env:GITHUB_OUTPUT
             "suffix=" >> $env:GITHUB_OUTPUT
             "name=$release" >> $env:GITHUB_OUTPUT
             "tag=v$release" >> $env:GITHUB_OUTPUT
           } else {
-            "prefix=1.0.0" >> $env:GITHUB_OUTPUT
+            "prefix=$project" >> $env:GITHUB_OUTPUT
             "suffix=ci.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_OUTPUT
-            "name=ci.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_OUTPUT
+            "name=$project-ci.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_OUTPUT
             "tag=" >> $env:GITHUB_OUTPUT
           }
 

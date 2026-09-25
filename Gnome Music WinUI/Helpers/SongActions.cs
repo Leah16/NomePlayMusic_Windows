@@ -73,12 +73,12 @@ public static class SongActions
     }
 
     /// <summary>
-    /// Removes a song from a user playlist with an undo toast (songtoast.py).
-    /// Undo puts it back at the same position.
+    /// Removes a song from a user playlist, or from Favorite Songs (unstarring it), with
+    /// an undo toast (songtoast.py). Undo puts it back at the same position.
     /// </summary>
-    public static void RemoveFromPlaylist(UserPlaylist playlist, int index)
+    public static void RemoveFromPlaylist(Playlist playlist, int index)
     {
-        if (index < 0 || index >= playlist.Songs.Count)
+        if (!playlist.IsEditable || index < 0 || index >= playlist.Songs.Count)
             return;
 
         var model = App.Services.Model;

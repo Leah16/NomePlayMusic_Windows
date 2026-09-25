@@ -151,8 +151,7 @@ public sealed partial class SongRow : UserControl
 
     private void OnMenuOpening(object? sender, object e)
     {
-        RemoveItem.Visibility = Playlist is not null ? Visibility.Visible : Visibility.Collapsed;
-        RemoveItem.IsEnabled = Playlist is UserPlaylist;
+        RemoveItem.Visibility = Playlist is { IsEditable: true } ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnPlayClick(object sender, RoutedEventArgs e)
@@ -180,9 +179,9 @@ public sealed partial class SongRow : UserControl
     }
 
     /// <summary>The song's file, audio stream and tags, read only (not in GNOME Music).</summary>
-    private async void OnPropertiesClick(object sender, RoutedEventArgs e)
+    private void OnPropertiesClick(object sender, RoutedEventArgs e)
     {
-        if (Song is { } song && App.MainWindow is { } window)
-            await window.ShowDialogAsync(new Dialogs.SongPropertiesDialog(song));
+        if (Song is { } song)
+            App.MainWindow?.ShowSongProperties(song);
     }
 }

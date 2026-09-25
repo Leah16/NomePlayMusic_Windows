@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Gnome_Music_WinUI.Controls;
 using Gnome_Music_WinUI.Helpers;
 using Gnome_Music_WinUI.Models;
 using Gnome_Music_WinUI.Services;
@@ -21,9 +22,10 @@ namespace Gnome_Music_WinUI.Views;
 /// where GNOME Music has its primary menu. The categories are in a sidebar, as Windows
 /// Settings has them, and changes apply immediately. Besides GNOME Music's player and
 /// power settings: the channel processing, the music output (interface, device, what the
-/// device takes, DSD), the player's features and the music folders, all of the Windows
-/// port. At the sidebar's foot, what the primary menu held besides: the keyboard
-/// shortcuts (shortcuts-dialog.ui) and About (about.py) with the help.
+/// device takes, DSD), the player's features, the music folders and a reset page (the
+/// lyrics cache, the play counts, the settings), all of the Windows port. At the
+/// sidebar's foot, what the primary menu held besides: the keyboard shortcuts
+/// (shortcuts-dialog.ui) and About (about.py) with the help.
 /// </summary>
 public sealed partial class PreferencesView : UserControl
 {
@@ -104,6 +106,7 @@ public sealed partial class PreferencesView : UserControl
             ("output", OutputPage, Strings.PrefsOutput),
             ("controls", ControlsPage, Strings.PrefsControls),
             ("folders", FoldersPage, Strings.MusicFolders),
+            ("reset", ResetPage, Strings.PrefsReset),
             ("shortcuts", ShortcutsPage, Strings.KeyboardShortcuts),
             ("about", AboutPage, Strings.About),
         };
@@ -118,7 +121,7 @@ public sealed partial class PreferencesView : UserControl
         RefreshPage();
     }
 
-    /// <summary>What may have changed since the page last showed: the devices, the features, the folders.</summary>
+    /// <summary>What may have changed since the page last showed: the devices, the features, the folders, the lyrics cache.</summary>
     private void RefreshPage()
     {
         switch (_category)
@@ -131,6 +134,9 @@ public sealed partial class PreferencesView : UserControl
                 break;
             case "folders":
                 UpdateFolders();
+                break;
+            case "reset":
+                _ = UpdateLyricsCacheAsync();
                 break;
         }
     }
@@ -155,11 +161,15 @@ public sealed partial class PreferencesView : UserControl
         UpdateOutputRows();
 
         MiniPlayerSwitch.IsOn = _settings.MiniPlayerEnabled;
+        MiniPlayerModeCombo.SelectedIndex = (int)_settings.MiniPlayerMode;
+        UpdateMiniPlayerOptions();
         OutputButtonSwitch.IsOn = _settings.OutputButtonEnabled;
         VolumeSwitch.IsOn = _settings.VolumeControlEnabled;
         LyricsSwitch.IsOn = _settings.LyricsEnabled;
         LocalLyricsSwitch.IsOn = _settings.LoadLocalLyrics;
         DownloadLyricsSwitch.IsOn = _settings.DownloadLyrics;
+        LyricsLocationCombo.SelectedIndex = (int)_settings.LyricsLocation;
+        RememberMissingLyricsSwitch.IsOn = _settings.RememberMissingLyrics;
         UpdateLyricsOptions();
         FormatSwitch.IsOn = _settings.ShowAudioFormat;
         UpdateFolders();
@@ -315,7 +325,10 @@ public sealed partial class PreferencesView : UserControl
         UpdateDsdRows();
     }
 
-    /// <summary>What the chosen DSD mode does, and whether the output allows it.</summary>
+    /// <summary>
+    /// Whether the output allows the chosen DSD mode: only then is there something to
+    /// say (the settings have no explanations), and the gain shows for PCM.
+    /// </summary>
     private void UpdateDsdRows()
     {
         var mode = Dsd;
@@ -325,15 +338,8 @@ public sealed partial class PreferencesView : UserControl
             DsdMode.Native => Api == OutputApi.Asio,
             _ => true,
         };
-        string text = mode switch
-        {
-            DsdMode.Dop => Strings.DsdDopDescription,
-            DsdMode.Native => Strings.DsdNativeDescription,
-            _ => Strings.DsdConvertDescription,
-        };
-        if (mode != DsdMode.ConvertToPcm)
-            text += " " + (possible ? Strings.DsdBitstreamNote : Strings.DsdNotPossible);
-        DsdModeDescription.Text = text;
+        DsdModeDescription.Text = possible ? "" : Strings.DsdNotPossible;
+        DsdModeDescription.Visibility = possible ? Visibility.Collapsed : Visibility.Visible;
         GainRow.Visibility = mode == DsdMode.ConvertToPcm || !possible ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -410,13 +416,10 @@ public sealed partial class PreferencesView : UserControl
         DsdText.Text = dsd.Count > 0 ? string.Join("\n", dsd) : none;
         ChannelsText.Text = channels.Count > 0 ? string.Join(Separator, channels.Select(ChannelName)) : none;
 
+        // Only what went wrong: the settings have no explanations.
         var notes = new List<string>();
         if (caps.Error is { } error)
             notes.Add(error);
-        else if (mixerOnly)
-            notes.Add(Strings.ExclusiveUnsupported);
-        else if ((Api == OutputApi.DirectSound || Api == OutputApi.Wasapi && !ExclusiveSwitch.IsOn) && caps.MixRate > 0)
-            notes.Add(Strings.MixerFormat(AudioFormats.RateText(caps.MixRate), ChannelName(caps.MixChannels)));
         FormatsNote.Text = string.Join("\n", notes);
         FormatsNoteRow.Visibility = notes.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -445,7 +448,25 @@ public sealed partial class PreferencesView : UserControl
         _settings.VolumeControlEnabled = VolumeSwitch.IsOn;
         _settings.LyricsEnabled = LyricsSwitch.IsOn;
         _settings.ShowAudioFormat = FormatSwitch.IsOn;
+        UpdateMiniPlayerOptions();
         UpdateLyricsOptions();
+    }
+
+    private void OnMiniPlayerModeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_loading && MiniPlayerModeCombo.SelectedIndex >= 0)
+            _settings.MiniPlayerMode = (MiniPlayerMode)MiniPlayerModeCombo.SelectedIndex;
+        UpdateMiniPlayerOptions();
+    }
+
+    /// <summary>The mode needs the mini player; the note is for the lyrics mode.</summary>
+    private void UpdateMiniPlayerOptions()
+    {
+        MiniPlayerModeCombo.IsEnabled = MiniPlayerSwitch.IsOn;
+        Dim(MiniPlayerModeLabel, MiniPlayerSwitch.IsOn);
+        MiniPlayerLyricsNote.Visibility = MiniPlayerModeCombo.SelectedIndex == (int)MiniPlayerMode.Lyrics
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void OnLyricsOptionToggled(object sender, RoutedEventArgs e)
@@ -454,20 +475,39 @@ public sealed partial class PreferencesView : UserControl
             return;
         _settings.LoadLocalLyrics = LocalLyricsSwitch.IsOn;
         _settings.DownloadLyrics = DownloadLyricsSwitch.IsOn;
+        _settings.RememberMissingLyrics = RememberMissingLyricsSwitch.IsOn;
+        UpdateLyricsOptions();
     }
 
-    /// <summary>Without the lyrics, where they come from does not matter: those rows are disabled.</summary>
+    private void OnLyricsLocationChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_loading && LyricsLocationCombo.SelectedIndex >= 0)
+            _settings.LyricsLocation = (LyricsLocation)LyricsLocationCombo.SelectedIndex;
+    }
+
+    /// <summary>
+    /// The lyrics options need the lyrics; where downloads go needs the downloads too
+    /// (LRCLIB is asked either way, so not asking it again does not).
+    /// </summary>
     private void UpdateLyricsOptions()
     {
         bool enabled = LyricsSwitch.IsOn;
-        LocalLyricsSwitch.IsEnabled = DownloadLyricsSwitch.IsEnabled = enabled;
-        foreach (var text in new[] { LocalLyricsLabel, LocalLyricsDescription, DownloadLyricsLabel, DownloadLyricsDescription })
-        {
-            if (enabled)
-                text.ClearValue(TextBlock.ForegroundProperty);
-            else
-                text.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorDisabledBrush"];
-        }
+        bool downloads = enabled && DownloadLyricsSwitch.IsOn;
+        LocalLyricsSwitch.IsEnabled = DownloadLyricsSwitch.IsEnabled = RememberMissingLyricsSwitch.IsEnabled = enabled;
+        LyricsLocationCombo.IsEnabled = downloads;
+        Dim(LocalLyricsLabel, enabled);
+        Dim(DownloadLyricsLabel, enabled);
+        Dim(LyricsLocationLabel, downloads);
+        Dim(RememberMissingLyricsLabel, enabled);
+    }
+
+    /// <summary>A disabled setting's name in the disabled text color.</summary>
+    private static void Dim(TextBlock text, bool enabled)
+    {
+        if (enabled)
+            text.ClearValue(TextBlock.ForegroundProperty);
+        else
+            text.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorDisabledBrush"];
     }
 
     // ------------------------------------------------------------------
@@ -490,4 +530,63 @@ public sealed partial class PreferencesView : UserControl
             UpdateFolders();
         }
     }
+
+    // ------------------------------------------------------------------
+    // Reset
+    // ------------------------------------------------------------------
+
+    /// <summary>What the lyrics cache holds now; the button is only there for a cache with files.</summary>
+    private async Task UpdateLyricsCacheAsync()
+    {
+        var (files, bytes) = await Task.Run(LyricsService.CacheSize);
+        LyricsCacheSize.Text = files == 0 ? Strings.LyricsCacheEmpty : Strings.LyricsCacheSize(files, FileSize(bytes));
+        ClearLyricsCacheButton.IsEnabled = files > 0;
+    }
+
+    private void OnClearLyricsCacheClick(object sender, RoutedEventArgs e) =>
+        Confirm(ClearLyricsCacheButton, Strings.ClearLyricsCacheConfirm, Strings.Clear, async () =>
+        {
+            int deleted = await App.Services.Lyrics.ClearCacheAsync();
+            App.MainWindow?.ShowToast(new Toast(Strings.LyricsCacheCleared(deleted)));
+            await UpdateLyricsCacheAsync();
+        });
+
+    private void OnClearPlayCountsClick(object sender, RoutedEventArgs e) =>
+        Confirm(ClearPlayCountsButton, Strings.ClearPlayCountsConfirm, Strings.Clear, () =>
+        {
+            App.Services.Model.ClearPlayCounts();
+            App.MainWindow?.ShowToast(new Toast(Strings.PlayCountsCleared));
+        });
+
+    /// <summary>Every preference back to its default: the pages show them at once.</summary>
+    private void OnResetSettingsClick(object sender, RoutedEventArgs e) =>
+        Confirm(ResetSettingsButton, Strings.ResetSettingsConfirm, Strings.ResetAction, () =>
+        {
+            Apply(_settings.ResetToDefaults);
+            LoadValues();
+            App.MainWindow?.ShowToast(new Toast(Strings.SettingsReset));
+        });
+
+    /// <summary>Asks first, in a flyout at the button: what happens, and the action as an accent button.</summary>
+    private static void Confirm(Button anchor, string message, string action, Action confirmed)
+    {
+        var button = new Button { Content = action, Style = (Style)Application.Current.Resources["AccentButtonStyle"] };
+        var panel = new StackPanel { Spacing = 12, MaxWidth = 300 };
+        panel.Children.Add(new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap });
+        panel.Children.Add(button);
+        var flyout = new Flyout { Content = panel, Placement = FlyoutPlacementMode.BottomEdgeAlignedRight };
+        button.Click += (_, _) =>
+        {
+            flyout.Hide();
+            confirmed();
+        };
+        flyout.ShowAt(anchor);
+    }
+
+    private static string FileSize(long bytes) => bytes switch
+    {
+        >= 1L << 20 => $"{bytes / (double)(1L << 20):0.0} MB",
+        >= 1L << 10 => $"{bytes / (double)(1L << 10):0.0} KB",
+        _ => $"{bytes} B",
+    };
 }
